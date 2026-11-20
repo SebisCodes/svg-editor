@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="260" viewBox="0 0 400 260">
+  <rect width="400" height="260" fill="#ffffff"/>
+  <g fill="#6c8ebf">
+    <rect x="50" y="140" width="50" height="90"/>
+    <rect x="130" y="90" width="50" height="140"/>
+    <rect x="210" y="60" width="50" height="170"/>
+    <rect x="290" y="110" width="50" height="120"/>
+  </g>
+  <line x1="30" y1="230" x2="370" y2="230" stroke="#333333" stroke-width="2"/>
+  <g font-family="system-ui, sans-serif" font-size="14" fill="#333333" text-anchor="middle">
+    <text x="75" y="250">Q1</text>
+    <text x="155" y="250">Q2</text>
+    <text x="235" y="250">Q3</text>
+    <text x="315" y="250">Q4</text>
+  </g>
+</svg>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- test file -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60" width="120" height="60">
+  <rect x="5" y="5" width="110" height="50" rx="8" fill="#eee" stroke="#333" stroke-width="2" class="box"/>
+  <text x="60" y="36" text-anchor="middle" style="font-size:14px;fill:#333">Hi {there}</text>
+</svg>

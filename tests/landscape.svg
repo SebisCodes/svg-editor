@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="320" viewBox="0 0 480 320">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8ec5ff"/>
+      <stop offset="1" stop-color="#e8f3ff"/>
+    </linearGradient>
+  </defs>
+  <!-- Click a shape to move it, resize it or change its color. -->
+  <rect width="480" height="320" fill="url(#sky)"/>
+  <circle cx="370" cy="80" r="42" fill="#ffc94a"/>
+  <path d="M0 250 L110 140 L190 210 L270 120 L400 250 Z" fill="#5f7d95"/>
+  <path d="M0 320 V240 Q120 200 240 245 T480 235 V320 Z" fill="#4caf72"/>
+  <rect x="80" y="225" width="60" height="45" fill="#f4efe6" stroke="#3b3b3b" stroke-width="2"/>
+  <polygon points="72,228 110,195 148,228" fill="#d9534f"/>
+  <text x="240" y="300" font-family="system-ui, sans-serif" font-size="22" font-weight="600" fill="#ffffff" text-anchor="middle">Hello SVG</text>
+</svg>
