@@ -79,7 +79,7 @@ export function isEscapedCssValue(value) {
 
 /**
  * Builds a CSS text in which the caller chooses every address (header, step 2): the escape-safe
- * CSS with each comment as a space, each address replaced by what getAddress gives for it.
+ * CSS with each comment as a space, each address written as getAddress gives it.
  * @param {string} css - the CSS as written.
  * @param {function(string, string): ?string} getAddress - gets an address and its kind
  *     (IMPORT_ADDRESS or RESOURCE_ADDRESS) and gives the address to write, null to keep it as

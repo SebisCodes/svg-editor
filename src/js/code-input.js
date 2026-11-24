@@ -9,11 +9,11 @@
 import { state, elements } from './state.js?v=2';
 import { getElementIndexAt } from './xml.js?v=6';
 import { parseCodeTags, TEMPLATE_SYNTAX } from './svg-template.js?v=1';
-import { renderCode, syncLayerScroll } from './code-view.js?v=4';
-import { renderDrawing } from './view.js?v=4';
-import { saveState } from './autosave.js?v=4';
-import { addHistoryStep, undo, redo } from './history.js?v=4';
-import { selectElement } from './selection.js?v=4';
+import { renderCode, syncLayerScroll } from './code-view.js?v=5';
+import { renderDrawing } from './view.js?v=5';
+import { saveState } from './autosave.js?v=5';
+import { addHistoryStep, undo, redo } from './history.js?v=5';
+import { selectElement } from './selection.js?v=5';
 
 const PARSE_DELAY = 250;                    // milliseconds of rest before the drawing is read again
 const HISTORY_DELAY = 600;                  // milliseconds of rest before typing becomes an undo step

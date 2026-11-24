@@ -7,8 +7,8 @@
 import { state, elements } from './state.js?v=2';
 import { SVGNS } from './xml.js?v=6';
 import { createMatrix, TOUCH } from './util.js?v=3';
-import { getRootMatrix, getBox, getScreenBox } from './canvas.js?v=4';
-import { getLength } from './export.js?v=7';
+import { getRootMatrix, getBox, getScreenBox } from './canvas.js?v=5';
+import { getLength } from './export.js?v=8';
 
 const MAJOR_EVERY = 5;                      // a major grid line every this many minor ones
 const MIN_MINOR_STEP = 5;                   // screen pixels below which a grid level is hidden

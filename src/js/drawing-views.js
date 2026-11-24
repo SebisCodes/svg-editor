@@ -14,7 +14,7 @@
 
 import { services } from './state.js?v=2';
 import { TEMPLATE_SYNTAX } from './svg-template.js?v=1';
-import { buildExampleDrawing } from './svg-examples.js?v=1';
+import { buildExampleDrawing } from './svg-examples.js?v=2';
 
 /** The view that shows the drawing filled with the examples. */
 export const EXAMPLE_VIEW = 'example';

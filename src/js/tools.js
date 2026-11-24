@@ -13,11 +13,11 @@ import { state, elements } from './state.js?v=2';
 import { SVGNS } from './xml.js?v=6';
 import { formatNumber } from './svg-values.js?v=3';
 import { findElement, findElements } from './util.js?v=3';
-import { getSnapped } from './canvas.js?v=4';
-import { drawOverlay } from './overlay.js?v=4';
+import { getSnapped } from './canvas.js?v=5';
+import { drawOverlay } from './overlay.js?v=5';
 import { updateHint } from './hint.js?v=3';
-import { addMarkup } from './structure.js?v=4';
-import { showSidePanel } from './layout.js?v=4';
+import { addMarkup } from './structure.js?v=5';
+import { showSidePanel } from './layout.js?v=5';
 
 /** The tag each drawing tool makes. */
 const TOOL_TAGS = { rect: 'rect', ellipse: 'ellipse', line: 'line', pen: 'path', text: 'text' };

@@ -14,8 +14,8 @@
 import { state, elements } from './state.js?v=2';
 import { formatNumber } from './svg-values.js?v=3';
 import { findElements, getHexColor } from './util.js?v=3';
-import { getBox } from './canvas.js?v=4';
-import { getProperty, getComputedValue } from './edits.js?v=4';
+import { getBox } from './canvas.js?v=5';
+import { getProperty, getComputedValue } from './edits.js?v=5';
 import { LABELS, PAINTABLE, GEOMETRY, escapeHtml } from './labels.js?v=3';
 import { hasTemplateTags, TEMPLATE_SYNTAX } from './svg-template.js?v=1';
 

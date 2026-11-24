@@ -14,18 +14,18 @@ import { createAi } from './ai.js?v=20';
 import { createMcp } from './mcp.js?v=7';
 import { createAiStatus } from './aistatus.js?v=9';
 import { createSync } from './sync.js?v=24';
-import { parse } from './export.js?v=7';
+import { parse } from './export.js?v=8';
 import { hasTemplateTags, TEMPLATE_SYNTAX } from './svg-template.js?v=1';
 import { formatSvg } from './xml-write.js?v=3';
 import { showToast } from './util.js?v=3';
-import { undo } from './history.js?v=4';
-import { selectElement } from './selection.js?v=4';
-import { setAttributes, applyChange, writeChangedTags } from './edits.js?v=4';
-import { removeSelection } from './structure.js?v=4';
-import { openDocument, createDocument, getBlankCode } from './documents.js?v=4';
-import { receiveDrawing, importPageDocument, AI_NAME } from './incoming.js?v=4';
+import { undo } from './history.js?v=5';
+import { selectElement } from './selection.js?v=5';
+import { setAttributes, applyChange, writeChangedTags } from './edits.js?v=5';
+import { removeSelection } from './structure.js?v=5';
+import { openDocument, createDocument, getBlankCode } from './documents.js?v=5';
+import { receiveDrawing, importPageDocument, AI_NAME } from './incoming.js?v=5';
 import { createTemplateExamples } from './template-examples.js?v=2';
-import { renderDrawing } from './view.js?v=4';
+import { renderDrawing } from './view.js?v=5';
 
 const PREFIX = 'svgeditor';
 

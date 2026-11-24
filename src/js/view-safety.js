@@ -17,7 +17,7 @@
 
 import { VIEWER } from './sync.js?v=24';
 import { hasTemplatePlaceholder, buildTemplatePicture } from './template-tags.js?v=2';
-import { buildEscapeSafeCss, buildCssWithAddresses, isEscapedCssValue, IMPORT_ADDRESS } from './css-references.js?v=1';
+import { buildEscapeSafeCss, buildCssWithAddresses, isEscapedCssValue, IMPORT_ADDRESS } from './css-references.js?v=2';
 
 /** Elements that could run code, load a page or submit: kept, but emptied of their attributes. */
 const INERT = /^(script|iframe|frame|frameset|embed|object|applet|meta|link|base|form|portal|noscript|template|handler|listener)$/i;

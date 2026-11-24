@@ -6,16 +6,16 @@
 
 import { state, services } from './state.js?v=2';
 import { store } from './document-store.js?v=2';
-import { createFiles } from './files.js?v=12';
+import { createFiles } from './files.js?v=13';
 import { START } from './samples.js?v=6';
 import { openConfirmation } from './dialogs.js?v=5';
 import { findElement, findElements, showToast } from './util.js?v=3';
-import { setCode, addHistoryStep, updateHistoryUi } from './history.js?v=4';
-import { resizeToFit } from './canvas.js?v=4';
-import { saveState, setSavedCode } from './autosave.js?v=4';
-import { writeChangedTags } from './edits.js?v=4';
-import { hasParseTimer, stopParseTimer } from './code-input.js?v=4';
-import { openFileDialog } from './file-input.js?v=4';
+import { setCode, addHistoryStep, updateHistoryUi } from './history.js?v=5';
+import { resizeToFit } from './canvas.js?v=5';
+import { saveState, setSavedCode } from './autosave.js?v=5';
+import { writeChangedTags } from './edits.js?v=5';
+import { hasParseTimer, stopParseTimer } from './code-input.js?v=5';
+import { openFileDialog } from './file-input.js?v=5';
 
 /** The <svg> tag of a new blank drawing. */
 export const BLANK_ROOT = '<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">';

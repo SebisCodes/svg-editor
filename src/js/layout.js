@@ -7,8 +7,8 @@
 
 import { state, elements } from './state.js?v=2';
 import { findElement, findElements, getClamped } from './util.js?v=3';
-import { resizeToFit, updatePaper } from './canvas.js?v=4';
-import { saveState } from './autosave.js?v=4';
+import { resizeToFit, updatePaper } from './canvas.js?v=5';
+import { saveState } from './autosave.js?v=5';
 
 const MIN_SPLIT = 0.15;
 const MAX_SPLIT = 0.85;

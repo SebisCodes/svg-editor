@@ -11,16 +11,16 @@ import { state, elements, services } from './state.js?v=2';
 import { findElement, findElements, showToast, getSafeFileName, FIX_ERROR_FIRST, SVG_TYPE } from './util.js?v=3';
 import { formatSvg, compressSvg } from './xml-write.js?v=3';
 import { hasTemplateTags, TEMPLATE_SYNTAX, TEMPLATE_FORMAT_NOTE } from './svg-template.js?v=1';
-import { saveDownload } from './export.js?v=7';
+import { saveDownload } from './export.js?v=8';
 import { openDialog } from './dialogs.js?v=5';
-import { setCode, undo, redo } from './history.js?v=4';
-import { resizeToFit, setZoom, ZOOM_STEP } from './canvas.js?v=4';
-import { drawOverlay } from './overlay.js?v=4';
+import { setCode, undo, redo } from './history.js?v=5';
+import { resizeToFit, setZoom, ZOOM_STEP } from './canvas.js?v=5';
+import { drawOverlay } from './overlay.js?v=5';
 import { updateHint } from './hint.js?v=3';
-import { saveState } from './autosave.js?v=4';
-import { writeChangedTags } from './edits.js?v=4';
-import { setTool } from './tools.js?v=4';
-import { openExportDialog } from './export-dialog.js?v=4';
+import { saveState } from './autosave.js?v=5';
+import { writeChangedTags } from './edits.js?v=5';
+import { setTool } from './tools.js?v=5';
+import { openExportDialog } from './export-dialog.js?v=5';
 
 
 let gridShow = null, gridSize = null, gridSnap = null, backgroundSelect = null;

@@ -11,8 +11,8 @@
 import { state, services } from './state.js?v=2';
 import { store } from './document-store.js?v=2';
 import { showToast } from './util.js?v=3';
-import { setCode } from './history.js?v=4';
-import { showFileName } from './documents.js?v=4';
+import { setCode } from './history.js?v=5';
+import { showFileName } from './documents.js?v=5';
 
 /** The storage key of the settings and the id of the open drawing. */
 export const SETTINGS_KEY = 'svgeditor.v1';

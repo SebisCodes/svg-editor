@@ -8,10 +8,10 @@ import { state } from './state.js?v=2';
 import { store } from './document-store.js?v=2';
 import { VIEWER } from './sync.js?v=24';
 import { showToast } from './util.js?v=3';
-import { setCode } from './history.js?v=4';
-import { resizeToFit } from './canvas.js?v=4';
-import { writeChangedTags } from './edits.js?v=4';
-import { openDocument, createDocument, getBlankCode } from './documents.js?v=4';
+import { setCode } from './history.js?v=5';
+import { resizeToFit } from './canvas.js?v=5';
+import { writeChangedTags } from './edits.js?v=5';
+import { openDocument, createDocument, getBlankCode } from './documents.js?v=5';
 
 /** The name of an AI's drawing that comes without one. */
 export const AI_NAME = 'AI drawing';

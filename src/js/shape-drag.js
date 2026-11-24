@@ -7,10 +7,10 @@
 
 import { state } from './state.js?v=2';
 import { formatNumber } from './svg-values.js?v=3';
-import { getSnapped, getElementToRootMatrix } from './canvas.js?v=4';
-import { drawOverlay } from './overlay.js?v=4';
-import { setAttributes, setBox } from './edits.js?v=4';
-import { getMovedAttributes, getParentDelta, getChangeableAttributes } from './geometry.js?v=4';
+import { getSnapped, getElementToRootMatrix } from './canvas.js?v=5';
+import { drawOverlay } from './overlay.js?v=5';
+import { setAttributes, setBox } from './edits.js?v=5';
+import { getMovedAttributes, getParentDelta, getChangeableAttributes } from './geometry.js?v=5';
 
 const MOVE_THRESHOLD = 3;                   // pixels the pointer moves before a shape moves
 
