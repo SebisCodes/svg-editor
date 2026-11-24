@@ -10,42 +10,44 @@
  *   1. the interface language (i18n.js), the page elements, the wrapped rows of the code view
  *      (wrap.js) and the shadow root of the view;
  *   2. the areas: storage, overlay, pointer, properties, layers, code input, bars, "My
- *      drawings", files and paste, keyboard, layout, export, color picker;
+ *      drawings", files and paste, keyboard, layout, export, color picker, the controls of
+ *      template placeholders;
  *   3. the settings and the drawing that was open last (the first visit gets the example);
  *   4. on the next frame: the drawing is read and shown, then AI Assistant, WebMCP, AI status
  *      and sync.js (assistants.js);
  *   5. the hook window.svgEditor for the automated tests.
  */
 
-import { createI18n } from './i18n.js?v=21';
+import { createI18n } from './i18n.js?v=22';
 import { createWrap } from './wrap.js?v=5';
 import { state, elements, services, startElements, startShadowRoot } from './state.js?v=2';
-import { store } from './files.js?v=11';
+import { store } from './files.js?v=12';
 import { START } from './samples.js?v=6';
 import { getHexColor } from './util.js?v=3';
-import { startAutosave, getStoredSettings, convertStoredSettings, setSavedCode } from './autosave.js?v=3';
-import { renderCode, syncLayerScroll } from './code-view.js?v=3';
-import { setCode, addHistoryStep, undo, redo } from './history.js?v=3';
-import { renderDrawing } from './view.js?v=3';
-import { resizeToFit, setZoom } from './canvas.js?v=3';
-import { startOverlay } from './overlay.js?v=3';
-import { selectElement } from './selection.js?v=3';
-import { getProperty } from './edits.js?v=3';
-import { startPointerInput } from './pointer.js?v=3';
-import { setTool } from './tools.js?v=3';
-import { startInspectorInput } from './inspector-input.js?v=3';
-import { startLayers, startLayerHover } from './layers.js?v=3';
-import { startLayerDrag } from './layers-drag.js?v=3';
-import { startCodeInput } from './code-input.js?v=3';
-import { startToolbar, startActionButtons, startDialogButtons, updateGridUi } from './toolbar.js?v=3';
-import { startDocuments, showFileName } from './documents.js?v=3';
-import { receiveDrawing } from './incoming.js?v=3';
-import { startFileInput } from './file-input.js?v=3';
-import { startKeyboard } from './keyboard.js?v=3';
-import { startLayout, updateSplit } from './layout.js?v=3';
-import { startExportDialog } from './export-dialog.js?v=3';
+import { startAutosave, getStoredSettings, convertStoredSettings, setSavedCode } from './autosave.js?v=4';
+import { renderCode, syncLayerScroll } from './code-view.js?v=4';
+import { setCode, addHistoryStep, undo, redo } from './history.js?v=4';
+import { renderDrawing } from './view.js?v=4';
+import { resizeToFit, setZoom } from './canvas.js?v=4';
+import { startOverlay } from './overlay.js?v=4';
+import { selectElement } from './selection.js?v=4';
+import { getProperty } from './edits.js?v=4';
+import { startPointerInput } from './pointer.js?v=4';
+import { setTool } from './tools.js?v=4';
+import { startInspectorInput } from './inspector-input.js?v=4';
+import { startLayers, startLayerHover } from './layers.js?v=4';
+import { startLayerDrag } from './layers-drag.js?v=4';
+import { startCodeInput } from './code-input.js?v=4';
+import { startToolbar, startActionButtons, startDialogButtons, updateGridUi } from './toolbar.js?v=4';
+import { startDocuments, showFileName } from './documents.js?v=4';
+import { receiveDrawing } from './incoming.js?v=4';
+import { startFileInput } from './file-input.js?v=4';
+import { startKeyboard } from './keyboard.js?v=4';
+import { startLayout, updateSplit } from './layout.js?v=4';
+import { startExportDialog } from './export-dialog.js?v=4';
 import { startColorPicker } from './colorpicker.js?v=5';
-import { startAssistants } from './assistants.js?v=3';
+import { startAssistants } from './assistants.js?v=4';
+import { startTemplateControls } from './template-panel.js?v=1';
 import './export-menu.js?v=6';
 
 const PREFIX = 'svgeditor';
@@ -99,6 +101,7 @@ function startAreas() {
     startExportDialog();
     startDialogButtons();
     startColorPicker({ colors: getDrawingColors });
+    startTemplateControls();
 }
 
 /**

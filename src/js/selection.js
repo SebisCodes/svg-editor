@@ -5,12 +5,12 @@
  */
 
 import { state, elements } from './state.js?v=2';
-import { SVGNS } from './xml.js?v=5';
+import { SVGNS } from './xml.js?v=6';
 import { updateHint } from './hint.js?v=3';
-import { renderMarks, showInCode } from './code-view.js?v=3';
-import { drawOverlay } from './overlay.js?v=3';
-import { renderInspector } from './inspector.js?v=3';
-import { showTreeSelection } from './layers.js?v=3';
+import { renderMarks, showInCode } from './code-view.js?v=4';
+import { drawOverlay } from './overlay.js?v=4';
+import { renderInspector } from './inspector.js?v=4';
+import { showTreeSelection } from './layers.js?v=4';
 
 /**
  * Selects an element and shows it everywhere; the current undo step remembers it.

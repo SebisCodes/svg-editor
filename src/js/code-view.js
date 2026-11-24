@@ -5,9 +5,11 @@
  */
 
 import { state, elements, services } from './state.js?v=2';
-import { escapeText } from './xml.js?v=5';
-import { highlight } from './xml-highlight.js?v=2';
-import { updateHistoryUi } from './history.js?v=3';
+import { escapeText } from './xml.js?v=6';
+import { highlight } from './xml-highlight.js?v=3';
+import { buildHighlightWithTemplateTags, convertTemplateTagsToBraces } from './template-tags.js?v=2';
+import { TEMPLATE_SYNTAX } from './svg-template.js?v=1';
+import { updateHistoryUi } from './history.js?v=4';
 
 const LINE_HEIGHT = 20;
 const HIGHLIGHT_LIMIT = 600000;             // characters up to which the code is highlighted
@@ -20,12 +22,13 @@ const VISIBLE_TOP_SHARE = 3;                // a revealed line lands a third dow
 let charWidth = 0;
 
 /**
- * Draws the code view: highlighting, marks, wrapped rows, the count, and the undo buttons.
+ * Draws the code view: highlighting, marks, wrapped rows, the count, and the undo buttons. With
+ * a template syntax the code is highlighted in brace form and every tag is put back as written, inside the highlighting around it.
  * @returns {void}
  */
 export function renderCode() {
     const code = state.code;
-    elements.hl.innerHTML = code.length < HIGHLIGHT_LIMIT ? highlight(code) + '\n' : escapeText(code) + '\n';
+    elements.hl.innerHTML = code.length < HIGHLIGHT_LIMIT ? buildHighlightWithTemplateTags(highlight(convertTemplateTagsToBraces(code, TEMPLATE_SYNTAX)), TEMPLATE_SYNTAX, code) + '\n' : escapeText(code) + '\n';
     renderMarks();
     const lineCount = code.split('\n').length;
     services.lineWrap.update(code);

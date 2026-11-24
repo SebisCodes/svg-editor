@@ -2,15 +2,24 @@
  * Editing a text in place: a double-click on a text puts a field over it on the canvas, the
  * cursor on the clicked character. Enter or leaving the field writes the text into the code
  * (one undo step), Escape cancels. A text made of several parts (tspan) is edited part by
- * part; one with further elements inside goes to the text field of the properties.
+ * part; one with further elements inside goes to the text field of the properties (the side
+ * panel opens for it). In the
+ * example view of a template a text that holds a placeholder shows an example: it is edited in
+ * the code or in the template view.
  */
 
 import { state } from './state.js?v=2';
-import { findElement } from './util.js?v=3';
-import { setCode, addHistoryStep } from './history.js?v=3';
-import { setText } from './edits.js?v=3';
-import { setInspectorRebuild } from './inspector.js?v=3';
-import { selectElement, getSelectableIndex, getViewElementAt } from './selection.js?v=3';
+import { findElement, showToast } from './util.js?v=3';
+import { setCode, addHistoryStep } from './history.js?v=4';
+import { setText } from './edits.js?v=4';
+import { setInspectorRebuild } from './inspector.js?v=4';
+import { selectElement, getSelectableIndex, getViewElementAt } from './selection.js?v=4';
+import { hasTemplateTags, TEMPLATE_SYNTAX } from './svg-template.js?v=1';
+import { isExampleViewShown } from './drawing-views.js?v=1';
+import { showSidePanel } from './layout.js?v=4';
+
+/** What a double-click on a text with an example in the example view says. */
+const EXAMPLE_TEXT_NOTE = 'This text shows an example - edit it in the code or in the template view';
 
 const FIELD_LEFT_SHIFT = 8;
 const MIN_FIELD_WIDTH = 60;
@@ -27,12 +36,16 @@ export function editTextOnDoubleClick(event) {
     const node = getViewElementAt(event.clientX, event.clientY);
     const index = node ? getSelectableIndex(node) : -1;
     if (index <= 0 || state.modelEls[index].localName !== 'text') return;
-    const part = node && node.localName === 'tspan' ? state.viewEls.indexOf(node) : -1;
+    const part = node && node.localName === 'tspan' ? state.viewIndex.get(node) ?? -1 : -1;
     const target = part > 0 && !state.modelEls[part].children.length ? part : index;
     selectElement(target);
+    if (isExampleViewShown() && hasTemplateTags(state.modelEls[target].textContent, TEMPLATE_SYNTAX)) { showToast(EXAMPLE_TEXT_NOTE); return; }
     if (!state.modelEls[target].children.length) { editTextInPlace(target, event.clientX, event.clientY); return; }
     const field = findElement('#f-text');
-    if (field) { field.focus(); field.select(); }
+    if (!field) return;
+    showSidePanel(true);
+    field.focus();
+    field.select();
 }
 
 /**

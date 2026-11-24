@@ -16,7 +16,8 @@
  */
 
 import { openDialog } from './dialogs.js?v=5';
-import { getPrompt } from './ai-prompt.js?v=2';
+import { isKeyInPrompt, isAnswerFromPage, getPageTexts } from './prompt-parts.js?v=1';
+import { getPrompt } from './ai-prompt.js?v=3';
 import { parseLinkHash, findLinks, readLink } from './ai-links.js?v=3';
 import { startTabs, findEditorTab, sendToTab } from './ai-tabs.js?v=3';
 
@@ -34,6 +35,8 @@ const FIELDS = 'textarea, input, select, [contenteditable]';
  * @property {function(): Promise<?Object>} [fetchKey] - asks the page for the session's key while there is none.
  * @property {function(): boolean} [keyValid] - true when the session has its key.
  * @property {function(string): boolean} [open] - opens a stored document in this tab, false when there is none.
+ * @property {function(function(): void): void} [handleAiClick] - a press on the AI button: the page's own dialog when it shows one, else the function given (the editor's dialog).
+ * @property {function(): string} [getKeyDecline] - the page's text for a declined key request, "" without.
  */
 
 /**
@@ -65,11 +68,11 @@ const linksInFlight = new Set();
  * @param {AiEditor} editor - what the AI Assistant asks of the editor.
  * @returns {{refresh: function(): void}} refresh() shows the page's AI settings anew.
  */
-export function createAi({ getState, receive, toast, remote = () => null, fetchKey = () => Promise.resolve(null), keyValid = () => false, open = () => false }) {
-    aiEditor = { getState, receive, toast, remote, fetchKey, keyValid, open };
+export function createAi({ getState, receive, toast, remote = () => null, fetchKey = () => Promise.resolve(null), keyValid = () => false, open = () => false, handleAiClick = openEditorDialog => openEditorDialog(), getKeyDecline = () => '' }) {
+    aiEditor = { getState, receive, toast, remote, fetchKey, keyValid, open, handleAiClick, getKeyDecline };
     startTabs(receive);
     startParts();
-    document.getElementById('btn-ai').addEventListener('click', openAiDialog);
+    document.getElementById('btn-ai').addEventListener('click', () => aiEditor.handleAiClick(openAiDialog));
     if (isFramed) {
         parts.stepLink.innerHTML = 'The AI answers with a link: <b>paste its whole answer below</b> (a clicked link opens a separate editor). <b>Undo</b> takes it back.';
     }
@@ -211,35 +214,41 @@ async function copyText(text, onCopied) {
 function showRemote() {
     const settings = aiEditor.remote();
     parts.remoteBox.hidden = !settings;
-    parts.privacy.textContent = settings ? `The AI sends the drawing to ${settings.label} with a key that only works for this session. What you paste into your AI is handled by its provider.` : parts.privacyText;
+    parts.privacy.textContent = !settings ? parts.privacyText : isAnswerFromPage(settings)
+        ? `${settings.label} gives the AI its instructions for answering. What you paste into your AI is handled by its provider.`
+        : `The AI sends the drawing to ${settings.label} with a key that only works for this session. What you paste into your AI is handled by its provider.`;
     if (!settings) { parts.stepLink.innerHTML = parts.stepHtml; return; }
     document.getElementById('ai-remote-host').textContent = settings.site && settings.site !== settings.label ? `${settings.label} (${settings.site})` : settings.label;
     const details = document.getElementById('ai-remote-details');
-    details.hidden = !settings.prompt;
+    const pageTexts = getPageTexts(settings);
+    details.hidden = !pageTexts;
     details.querySelector('span').textContent = settings.site || settings.label;
-    document.getElementById('ai-remote-prompt').textContent = settings.prompt || '';
-    parts.stepLink.textContent = `The AI sends its result to ${settings.label} by itself, and it opens here. If it answers with a link, paste its answer below.`;
-    parts.keyNote.textContent = !settings.endpoint ? '' : !settings.key ? '(no key yet)' : '(key valid while the editor is open)';
+    document.getElementById('ai-remote-prompt').textContent = pageTexts;
+    parts.stepLink.textContent = isAnswerFromPage(settings)
+        ? `The AI answers as ${settings.label} describes in the prompt. If it answers with a link, paste its answer below.`
+        : `The AI sends its result to ${settings.label} by itself, and it opens here. If it answers with a link, paste its answer below.`;
+    parts.keyNote.textContent = !isKeyInPrompt(settings) ? '' : !settings.key ? '(no key yet)' : '(key valid while the editor is open)';
 }
 
 /**
- * Copies the prompt; asks the page for the session's key first when it has an endpoint and
- * the session has no key yet.
+ * Copies the prompt; asks the page for the session's key first when the prompt posts to the
+ * page's endpoint and the session has no key yet. A page that declines the key gives the
+ * message shown after copying.
  * @returns {Promise<void>} resolves when copied.
  */
 async function copyPrompt() {
-    let settings = aiEditor.remote();
-    if (settings && settings.endpoint && !aiEditor.keyValid()) {
+    let settings = aiEditor.remote(), declined = '';
+    if (isKeyInPrompt(settings) && !aiEditor.keyValid()) {
         await aiEditor.fetchKey();
         settings = aiEditor.remote();
         showRemote();
-        if (settings && !aiEditor.keyValid()) aiEditor.toast(`No key from ${settings.label} - the prompt asks the AI for a link instead`);
+        if (settings && !aiEditor.keyValid()) { declined = aiEditor.getKeyDecline(); aiEditor.toast(declined || `No key from ${settings.label} - the prompt asks the AI for a link instead`); }
     }
     const makeNew = parts.dialog.querySelector('[name=ai-target]:checked').value === 'new';
     const remote = settings && settings.endpoint && !aiEditor.keyValid() ? { ...settings, key: '' } : settings;
     const text = getPrompt({ ...aiEditor.getState(), framed: isFramed, remote }, makeNew);
     copyText(text, () => {
-        aiEditor.toast(settings && aiEditor.keyValid() ? `Prompt copied - the AI sends its result to ${settings.label}` : 'Prompt copied - paste it into your AI and say what it should draw');
+        aiEditor.toast(declined || (settings && aiEditor.keyValid() && !isAnswerFromPage(settings) ? `Prompt copied - the AI sends its result to ${settings.label}` : 'Prompt copied - paste it into your AI and say what it should draw'));
         parts.dialog.close();
     });
 }

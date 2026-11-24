@@ -6,15 +6,15 @@
  */
 
 import { state, elements } from './state.js?v=2';
-import { parseStyle, formatStyle } from './svg-values.js?v=3';
+import { parseStyle } from './svg-values.js?v=3';
 import { findElement, findElements, showToast, getHexColor } from './util.js?v=3';
-import { addHistoryStep } from './history.js?v=3';
-import { drawOverlay } from './overlay.js?v=3';
-import { selectElement } from './selection.js?v=3';
-import { hasCodeError, showFixErrorFirst, setAttributes, writeChangedTags, getComputedValue } from './edits.js?v=3';
-import { removeSelection, copySelection, moveInDrawingOrder, FORWARD, BACKWARD } from './structure.js?v=3';
-import { buildInspector } from './inspector.js?v=3';
-import { LABELS, PAINTABLE, escapeHtml } from './labels.js?v=2';
+import { addHistoryStep } from './history.js?v=4';
+import { drawOverlay } from './overlay.js?v=4';
+import { selectElement } from './selection.js?v=4';
+import { hasCodeError, showFixErrorFirst, setAttributes, setProperty, writeChangedTags, getComputedValue } from './edits.js?v=4';
+import { removeSelection, copySelection, moveInDrawingOrder, FORWARD, BACKWARD } from './structure.js?v=4';
+import { buildInspector } from './inspector.js?v=4';
+import { LABELS, PAINTABLE, escapeHtml } from './labels.js?v=3';
 
 const TEXT_PREVIEW_LENGTH = 24;
 const ID_PATTERN = /^[A-Za-z_][\w.-]*$/;
@@ -186,8 +186,7 @@ function applyHiddenSwitch(index) {
     const model = state.modelEls[index];
     if (isHidden(index)) {
         if (model.getAttribute('display') === 'none') setAttributes(index, { display: null });
-        const style = parseStyle(model.getAttribute('style'));
-        if (style.get('display') === 'none') { style.delete('display'); setAttributes(index, { style: style.size ? formatStyle(style) : null }); }
+        if (parseStyle(model.getAttribute('style')).get('display') === 'none') setProperty(index, 'display', null);
     } else setAttributes(index, { display: 'none' });
     writeChangedTags();
     addHistoryStep();

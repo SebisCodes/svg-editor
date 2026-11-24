@@ -34,9 +34,25 @@ your drawings stay there unless you send them somewhere yourself.
 ## Working on the canvas
 
 Click a shape to select it; drag it to move it and drag the small squares to resize it.
-Colors, size and position are under **Properties** on the right. **Alt+click** selects the
+Colors, size and position are under **Properties** in the side panel. **Alt+click** selects the
 surrounding group. In the code, clicking into a tag selects that shape on the canvas. The
 preview never runs scripts or `on…` attributes of a drawing.
+
+## Side panel
+
+The side panel holds **Properties** and **Layers**. The button at the top right of the work area
+opens it over the canvas and closes it again (Escape too); it is closed when the editor opens. On a
+phone it is the view **Edit**.
+
+## Templates with placeholders
+
+A website that edits templates opens the editor with `?template=mustache` or `?template=angle`.
+The canvas then shows the drawing filled with the website's examples; **Template** in the canvas
+bar shows the placeholders as written, **Examples** brings the examples back. A placeholder without
+an example shows its label in brackets. The **Placeholders** box below the code lists them: a click
+puts one at the cursor, a section around the selected text. A text that shows an example is edited
+in the code or in the template view; moving and resizing shapes change the template. Saving,
+downloading and exporting keep the placeholders.
 
 ## Your drawings
 
@@ -87,7 +103,9 @@ appears in your editor. **Undo** takes every change back. The links look like th
 A tab opened with such a link hands the drawing to the editor tab you used last. You can
 also paste the AI's whole answer into the editor (Ctrl+V outside the code); links that a
 terminal broke over several lines are joined. When the editor is embedded in another
-website, links cannot reach it, so paste the answer there.
+website, links cannot reach it, so paste the answer there. A website that embeds the
+editor may give its own instructions for how the AI answers, or show its own AI dialog
+when you press the button; the dialog names the website and shows its instructions.
 
 **Browser agents (WebMCP):** in browsers that offer WebMCP, the page registers tools for AI
 agents that run in the page itself: `get_drawing`, `list_shapes`, `set_drawing`,

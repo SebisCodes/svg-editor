@@ -6,10 +6,11 @@
 
 import { state } from './state.js?v=2';
 import { findElement, getClamped, showToast, getSafeFileName, FIX_ERROR_FIRST, SVG_TYPE } from './util.js?v=3';
-import { getExportVariants, convertToImage, saveDownload } from './export.js?v=6';
+import { getExportVariants, convertToImage, saveDownload } from './export.js?v=7';
+import { TEMPLATE_SYNTAX } from './svg-template.js?v=1';
 import { createZip } from './zip.js?v=4';
 import { openDialog } from './dialogs.js?v=5';
-import { writeChangedTags } from './edits.js?v=3';
+import { writeChangedTags } from './edits.js?v=4';
 
 const RASTER_FORMAT = /^(png|jpeg|webp)$/;
 const MAX_PIXELS = 16384;
@@ -99,7 +100,7 @@ function updateExportPreview() {
         fields.backgroundColor.disabled = !fields.background.checked;
         return;
     }
-    const variants = getExportVariants(state.doc, state.code, fields.name.value || DEFAULT_NAME);
+    const variants = getExportVariants(state.doc, state.code, fields.name.value || DEFAULT_NAME, TEMPLATE_SYNTAX);
     fields.text.value = variants[format];
     fields.info.textContent = `${new Blob([variants[format]]).size.toLocaleString('en')} bytes`;
 }
@@ -162,7 +163,7 @@ async function exportAllFormats() {
     const background = fields.background.checked ? fields.backgroundColor.value : null;
     button.disabled = true;
     try {
-        const variants = getExportVariants(state.doc, state.code, fields.name.value || DEFAULT_NAME);
+        const variants = getExportVariants(state.doc, state.code, fields.name.value || DEFAULT_NAME, TEMPLATE_SYNTAX);
         const zipFiles = [
             { name: `${name}.svg`, data: variants.svg },
             { name: `${name}-tidy.svg`, data: variants.pretty },

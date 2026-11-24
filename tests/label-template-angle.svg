@@ -1,0 +1,18 @@
+<<?hasLabel>>
+<svg xmlns="http://www.w3.org/2000/svg" width="<<width>>" height="200" viewBox="0 0 400 200">
+  <!-- Shipping label for <<name>> -->
+  <title>Order <<orderId>></title>
+  <rect id="frame-<<orderId>>" x="0" y="0" width="400" height="200" fill="<<background>>" stroke="#333333"/>
+  <image href="<<logo>>" x="300" y="16" width="80" height="40"/>
+  <rect id="stamp" x="<<stampX>>" y="150" width="60" height="30" fill="#dddddd"/>
+  <text x="20" y="40" font-size="20"><<name>></text>
+  <text x="20" y="70"><<street>></text>
+  <text x="20" y="95"><<postalCode>> <<city>></text>
+  <g font-size="12" opacity="<<opacity>>">
+    <<?items>>
+    <text x="20" y="130"><<quantity>> x <<title>></text>
+    <</?items>>
+  </g>
+  <<?hasNote>><text x="20" y="185" font-style="italic"><<note>></text><</?hasNote>>
+</svg>
+<</?hasLabel>>

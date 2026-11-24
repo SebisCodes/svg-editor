@@ -6,14 +6,18 @@
  * While a field of the panel has focus, the panel is not drawn anew (that would take the
  * focus away); only the values of the other fields follow. setInspectorRebuild() draws it
  * anew all the same at the next renderInspector().
+ *
+ * A value that holds a template placeholder is shown as written in a text field in the place of
+ * its slider, number field or list (svg-template.js).
  */
 
 import { state, elements } from './state.js?v=2';
 import { formatNumber } from './svg-values.js?v=3';
 import { findElements, getHexColor } from './util.js?v=3';
-import { getBox } from './canvas.js?v=3';
-import { getProperty, getComputedValue } from './edits.js?v=3';
-import { LABELS, PAINTABLE, GEOMETRY, escapeHtml } from './labels.js?v=2';
+import { getBox } from './canvas.js?v=4';
+import { getProperty, getComputedValue } from './edits.js?v=4';
+import { LABELS, PAINTABLE, GEOMETRY, escapeHtml } from './labels.js?v=3';
+import { hasTemplateTags, TEMPLATE_SYNTAX } from './svg-template.js?v=1';
 
 const PERCENT = 100;
 const DEFAULT_STROKE_WIDTH = 1;
@@ -44,6 +48,20 @@ export function setInspectorRebuild() {
 export function buildInspector() {
     setInspectorRebuild();
     renderInspector();
+}
+
+/**
+ * Returns the control of a property: the given control, or a text field with the value as
+ * written when the value holds a template placeholder.
+ * @param {string} key - the property (data-k).
+ * @param {?string} value - its value as written.
+ * @param {string} label - the field's accessible name.
+ * @param {function(): string} getControlHtml - returns the control for other values.
+ * @returns {string} the HTML of the control.
+ */
+function getValueControlHtml(key, value, label, getControlHtml) {
+    if (!hasTemplateTags(value, TEMPLATE_SYNTAX)) return getControlHtml();
+    return `<input class="template-value" data-k="${escapeHtml(key)}" value="${escapeHtml(value)}" spellcheck="false" aria-label="${escapeHtml(label)}">`;
 }
 
 /**
@@ -78,7 +96,7 @@ function getPaintRowHtml(index, property, label) {
         <input class="hex-value" data-k="${property}-text" value="${escapeHtml(raw ?? '')}" placeholder="${escapeHtml(isInherited ? (none ? 'none' : (getHexColor(computed) || computed)) + ' (inherited)' : '')}" spellcheck="false" aria-label="${label} color as text" title="Color as text, e.g. #ff0000, red or none">
         <button type="button" class="button small ${none ? 'on' : ''}" data-k="${property}-none" aria-pressed="${none}" title="No ${label.toLowerCase()}">None</button>
         ${isUrl ? '<span class="hint">Uses a gradient or pattern - picking a color replaces it.</span>' : ''}
-        <label class="slider"><span>Opacity</span><input type="range" min="0" max="1" step="0.05" data-k="${property}-opacity" value="${opacity == null ? 1 : escapeHtml(opacity)}"><output>${Math.round((opacity == null ? 1 : +opacity) * PERCENT)}%</output></label>
+        <label class="slider"><span>Opacity</span>${getValueControlHtml(property + '-opacity', opacity, label + ' opacity', () => `<input type="range" min="0" max="1" step="0.05" data-k="${property}-opacity" value="${opacity == null ? 1 : escapeHtml(opacity)}"><output>${Math.round((opacity == null ? 1 : +opacity) * PERCENT)}%</output>`)}</label>
     </div>`;
 }
 
@@ -151,7 +169,7 @@ function getShapeHtml(index, model) {
     let html = `<h3>${escapeHtml(LABELS[tag] || tag)} <code>&lt;${escapeHtml(model.tagName)}&gt;</code></h3>`;
     if (PAINTABLE.has(tag)) html += getPaintHtml(index);
     const opacity = getProperty(index, 'opacity');
-    html += `<label class="slider total"><span>Overall opacity</span><input type="range" min="0" max="1" step="0.05" data-k="opacity" value="${opacity == null ? 1 : escapeHtml(opacity)}"><output>${Math.round((opacity == null ? 1 : +opacity) * PERCENT)}%</output></label>`;
+    html += `<label class="slider total"><span>Overall opacity</span>${getValueControlHtml('opacity', opacity, 'Overall opacity', () => `<input type="range" min="0" max="1" step="0.05" data-k="opacity" value="${opacity == null ? 1 : escapeHtml(opacity)}"><output>${Math.round((opacity == null ? 1 : +opacity) * PERCENT)}%</output>`)}</label>`;
     if (tag === 'text') html += getTextHtml(index, model);
     if (GEOMETRY.has(tag)) html += getGeometryHtml(index);
     return html + getArrangeHtml();
@@ -168,12 +186,12 @@ function getPaintHtml(index) {
     const cap = getProperty(index, 'stroke-linecap') || '';
     const join = getProperty(index, 'stroke-linejoin') || '';
     return getPaintRowHtml(index, 'fill', 'Fill') + getPaintRowHtml(index, 'stroke', 'Outline') + `<div class="row3">
-              <label class="field"><span>Outline width</span><input type="number" min="0" step="0.5" data-k="stroke-width" value="${escapeHtml(strokeWidth ?? '')}" placeholder="${escapeHtml(parseFloat(getComputedValue(index, 'stroke-width')) || DEFAULT_STROKE_WIDTH)}"></label>
-              <label class="field"><span>Line style</span><select data-k="stroke-dasharray">${getOptionsHtml(DASHES, dash)}${dash && !DASHES.some(entry => entry[0] === dash) ? `<option selected value="${escapeHtml(dash)}">${escapeHtml(dash)}</option>` : ''}</select></label>
+              <label class="field"><span>Outline width</span>${getValueControlHtml('stroke-width', strokeWidth, 'Outline width', () => `<input type="number" min="0" step="0.5" data-k="stroke-width" value="${escapeHtml(strokeWidth ?? '')}" placeholder="${escapeHtml(parseFloat(getComputedValue(index, 'stroke-width')) || DEFAULT_STROKE_WIDTH)}">`)}</label>
+              <label class="field"><span>Line style</span>${getValueControlHtml('stroke-dasharray', dash, 'Line style', () => `<select data-k="stroke-dasharray">${getOptionsHtml(DASHES, dash)}${dash && !DASHES.some(entry => entry[0] === dash) ? `<option selected value="${escapeHtml(dash)}">${escapeHtml(dash)}</option>` : ''}</select>`)}</label>
             </div>
             <div class="row3">
-              <label class="field"><span>Line ends</span><select data-k="stroke-linecap">${getOptionsHtml(LINE_ENDS, cap)}</select></label>
-              <label class="field"><span>Corners</span><select data-k="stroke-linejoin">${getOptionsHtml(CORNERS, join)}</select></label>
+              <label class="field"><span>Line ends</span>${getValueControlHtml('stroke-linecap', cap, 'Line ends', () => `<select data-k="stroke-linecap">${getOptionsHtml(LINE_ENDS, cap)}</select>`)}</label>
+              <label class="field"><span>Corners</span>${getValueControlHtml('stroke-linejoin', join, 'Corners', () => `<select data-k="stroke-linejoin">${getOptionsHtml(CORNERS, join)}</select>`)}</label>
             </div>`;
 }
 
@@ -192,12 +210,12 @@ function getTextHtml(index, model) {
     return `<h3>Text</h3>` + (hasChildren
         ? '<p class="hint">This text contains further elements (e.g. tspan) - please edit it in the code.</p>'
         : `<textarea id="f-text" rows="2" data-text>${escapeHtml(model.textContent)}</textarea>`) + `<div class="row3">
-              <label class="field"><span>Size</span><input type="number" min="1" step="1" data-k="font-size" value="${escapeHtml(fontSize != null ? parseFloat(fontSize) : '')}" placeholder="${escapeHtml(parseFloat(getComputedValue(index, 'font-size')) || DEFAULT_FONT_SIZE)}"></label>
-              <label class="field"><span>Weight</span><select data-k="font-weight">${getOptionsHtml(WEIGHTS, fontWeight)}</select></label>
+              <label class="field"><span>Size</span>${getValueControlHtml('font-size', fontSize, 'Size', () => `<input type="number" min="1" step="1" data-k="font-size" value="${escapeHtml(fontSize != null ? parseFloat(fontSize) : '')}" placeholder="${escapeHtml(parseFloat(getComputedValue(index, 'font-size')) || DEFAULT_FONT_SIZE)}">`)}</label>
+              <label class="field"><span>Weight</span>${getValueControlHtml('font-weight', fontWeight, 'Weight', () => `<select data-k="font-weight">${getOptionsHtml(WEIGHTS, fontWeight)}</select>`)}</label>
             </div>
             <div class="row3">
               <label class="field"><span>Font</span><input data-k="font-family" value="${escapeHtml(fontFamily ?? '')}" placeholder="system-ui, sans-serif" list="fonts"></label>
-              <label class="field"><span>Alignment</span><select data-k="text-anchor">${getOptionsHtml(ALIGNMENTS, anchor)}</select></label>
+              <label class="field"><span>Alignment</span>${getValueControlHtml('text-anchor', anchor, 'Alignment', () => `<select data-k="text-anchor">${getOptionsHtml(ALIGNMENTS, anchor)}</select>`)}</label>
             </div>`;
 }
 

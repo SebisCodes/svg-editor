@@ -8,8 +8,8 @@
 
 import { state, elements } from './state.js?v=2';
 import { findElement, showToast } from './util.js?v=3';
-import { setCode } from './history.js?v=3';
-import { createDocument } from './documents.js?v=3';
+import { setCode } from './history.js?v=4';
+import { createDocument } from './documents.js?v=4';
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 const MIDDLE_BUTTON = 1;

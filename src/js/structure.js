@@ -6,12 +6,12 @@
  */
 
 import { state } from './state.js?v=2';
-import { parseTags } from './xml.js?v=5';
+import { parseCodeTags, TEMPLATE_SYNTAX } from './svg-template.js?v=1';
 import { showToast } from './util.js?v=3';
-import { setCode, addHistoryStep } from './history.js?v=3';
-import { selectElement } from './selection.js?v=3';
-import { hasCodeError, showFixErrorFirst, writeChangedTags, setAttributes } from './edits.js?v=3';
-import { getSnapshot, getMovedAttributes, getParentDelta } from './geometry.js?v=3';
+import { setCode, addHistoryStep } from './history.js?v=4';
+import { selectElement } from './selection.js?v=4';
+import { hasCodeError, showFixErrorFirst, writeChangedTags, setAttributes } from './edits.js?v=4';
+import { getSnapshot, getMovedAttributes, getParentDelta } from './geometry.js?v=4';
 
 const DEFAULT_INDENT = '  ';
 const COPY_OFFSET = 10;                     // root units a copy lies off its original without a grid
@@ -80,7 +80,7 @@ export function addMarkup(markup) {
         const close = root.tagEnd - 2;
         code = code.slice(0, close).replace(/\s*$/, '') + '>\n</svg>' + code.slice(root.tagEnd);
         state.code = code;
-        state.scanEls = parseTags(code);
+        state.scanEls = parseCodeTags(code, TEMPLATE_SYNTAX);
     }
     const openRoot = state.scanEls[0];
     const children = state.scanEls.filter(tag => tag.parent === 0);

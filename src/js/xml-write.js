@@ -4,7 +4,8 @@
  * indented) and the whole drawing shrunk (no comments, no white space between tags).
  */
 
-import { escapeText, escapeAttribute } from './xml.js?v=5';
+import { escapeText, escapeAttribute } from './xml.js?v=6';
+import { escapeTextOutsideTemplateTags } from './template-tags.js?v=2';
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
@@ -24,10 +25,12 @@ const SPACED_ATTRIBUTES = new Set(['d', 'points', 'transform', 'viewBox', 'strok
  * @param {Element} element - the element.
  * @param {boolean} selfClose - true for <tag/>.
  * @param {?string} [indent] - the indent of the attribute lines, null for one line.
+ * @param {?import('./template-tags.js').TemplateSyntax} [syntax=null] - the template syntax, whose tags in the
+ *     values are written as they are; null for plain SVG.
  * @returns {string} the start tag.
  */
-export function getStartTag(element, selfClose, indent) {
-    const attributes = [...element.attributes].map(attribute => `${attribute.name}="${escapeAttribute(attribute.value)}"`);
+export function getStartTag(element, selfClose, indent, syntax = null) {
+    const attributes = [...element.attributes].map(attribute => `${attribute.name}="${escapeTextOutsideTemplateTags(attribute.value, syntax, escapeAttribute)}"`);
     const close = selfClose ? '/>' : '>';
     if (indent != null && attributes.length > 1) {
         return `<${element.tagName}\n` + attributes.map(attribute => indent + attribute).join('\n') + close;

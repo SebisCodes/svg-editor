@@ -10,19 +10,22 @@
 
 import { state, services } from './state.js?v=2';
 import { store } from './document-store.js?v=2';
-import { createAi } from './ai.js?v=19';
+import { createAi } from './ai.js?v=20';
 import { createMcp } from './mcp.js?v=7';
-import { createAiStatus } from './aistatus.js?v=8';
-import { createSync } from './sync.js?v=23';
-import { parse } from './export.js?v=6';
-import { formatSvg } from './xml-write.js?v=2';
+import { createAiStatus } from './aistatus.js?v=9';
+import { createSync } from './sync.js?v=24';
+import { parse } from './export.js?v=7';
+import { hasTemplateTags, TEMPLATE_SYNTAX } from './svg-template.js?v=1';
+import { formatSvg } from './xml-write.js?v=3';
 import { showToast } from './util.js?v=3';
-import { undo } from './history.js?v=3';
-import { selectElement } from './selection.js?v=3';
-import { setAttributes, applyChange, writeChangedTags } from './edits.js?v=3';
-import { removeSelection } from './structure.js?v=3';
-import { openDocument, createDocument, getBlankCode } from './documents.js?v=3';
-import { receiveDrawing, importPageDocument, AI_NAME } from './incoming.js?v=3';
+import { undo } from './history.js?v=4';
+import { selectElement } from './selection.js?v=4';
+import { setAttributes, applyChange, writeChangedTags } from './edits.js?v=4';
+import { removeSelection } from './structure.js?v=4';
+import { openDocument, createDocument, getBlankCode } from './documents.js?v=4';
+import { receiveDrawing, importPageDocument, AI_NAME } from './incoming.js?v=4';
+import { createTemplateExamples } from './template-examples.js?v=2';
+import { renderDrawing } from './view.js?v=4';
 
 const PREFIX = 'svgeditor';
 
@@ -46,6 +49,8 @@ export function startAssistants() {
         remote: () => services.sync?.getAiSettings() || null,
         fetchKey: () => (services.sync ? services.sync.fetchKey() : Promise.resolve(null)),
         keyValid: () => !!services.sync?.hasValidKey(),
+        handleAiClick: openEditorDialog => (services.sync ? services.sync.handleAiClick(openEditorDialog) : openEditorDialog()),
+        getKeyDecline: () => services.sync?.getKeyDecline() || '',
         getState: getAiPromptState,
         receive: async (...drawing) => { setTimeout(() => aiStatus.addDelivery('link')); await receiveDrawing(...drawing); return state.fileId; },
         open: openStoredDocument,
@@ -170,16 +175,19 @@ function createSyncEditor(aiStatus) {
         hookFor: id => store.getMeta(id)?.hook || null,
         setHookFor: setDocumentHook,
         onAi: () => services.aiDialog?.refresh(),
+        parseTemplate: message => createTemplateExamples(message),
+        onTemplate: () => renderDrawing(),
     };
 }
 
 /**
- * Returns code tidied for sync.js (?tidy=1, tidy in load); code that does not parse comes back
- * as it is.
+ * Returns code tidied for sync.js (?tidy=1, tidy in load); code that does not parse and a
+ * template with placeholders come back as they are.
  * @param {string} code - the code.
  * @returns {string} the tidied code.
  */
 function getTidiedCode(code) {
+    if (hasTemplateTags(code, TEMPLATE_SYNTAX)) return code;
     const result = parse(code);
     return result.error || !result.doc ? code : formatSvg(result.doc, code);
 }

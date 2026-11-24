@@ -4,9 +4,9 @@
  * JavaScript expression: braces in text and the content of <style> are written as strings.
  */
 
-import { escapeAttribute } from './xml.js?v=5';
+import { escapeAttribute } from './xml.js?v=6';
 import { parseStyle } from './svg-values.js?v=3';
-import { isBlank } from './xml-write.js?v=2';
+import { isBlank } from './xml-write.js?v=3';
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;

@@ -6,12 +6,12 @@
  */
 
 import { state, elements } from './state.js?v=2';
-import { parseTags } from './xml.js?v=5';
+import { parseCodeTags, TEMPLATE_SYNTAX } from './svg-template.js?v=1';
 import { findElement, showToast } from './util.js?v=3';
-import { renderCode } from './code-view.js?v=3';
-import { renderDrawing } from './view.js?v=3';
-import { saveState } from './autosave.js?v=3';
-import { writeChangedTags } from './edits.js?v=3';
+import { renderCode } from './code-view.js?v=4';
+import { renderDrawing } from './view.js?v=4';
+import { saveState } from './autosave.js?v=4';
+import { writeChangedTags } from './edits.js?v=4';
 
 const HISTORY_LIMIT = 300;
 
@@ -35,7 +35,7 @@ export function setCode(code, { reparse = true, history = true, select } = {}) {
     state.code = code;
     writeCodeField(code);
     if (reparse) renderDrawing(select);
-    else { state.scanEls = parseTags(code); renderCode(); }
+    else { state.scanEls = parseCodeTags(code, TEMPLATE_SYNTAX); renderCode(); }
     if (history) addHistoryStep();
     saveState();
 }

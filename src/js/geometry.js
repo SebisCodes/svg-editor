@@ -2,20 +2,26 @@
  * The new attributes of a moved, resized or flipped shape. Where the shape's coordinates are
  * plain numbers, they change (rectangles, circles, ellipses, lines, point lists, paths, text,
  * images); otherwise, and for groups and shapes with a transform, the change goes into the
- * transform attribute. Every mapping works in the coordinates of the shape's parent.
+ * transform attribute. Every mapping works in the coordinates of the shape's parent. An attribute
+ * that holds a template placeholder keeps its value: coordinates with a placeholder make the
+ * change go into the transform, and a transform with one stays as written.
  */
 
 import { state } from './state.js?v=2';
 import { createMatrix } from './util.js?v=3';
-import { getBox, getElementToRootMatrix } from './canvas.js?v=3';
+import { getBox, getElementToRootMatrix } from './canvas.js?v=4';
 import { formatNumber, getNumbers, formatMatrix } from './svg-values.js?v=3';
 import { movePath, resizePath, getMappedPoints } from './svg-path.js?v=3';
+import { hasTemplateTags, TEMPLATE_SYNTAX } from './svg-template.js?v=1';
 
 const AXIS_TOLERANCE = 1e-9;
 const PLAIN_NUMBER = /^\s*[-+]?(?:\d*\.\d+|\d+\.?)(?:e[-+]?\d+)?\s*(px)?\s*$/i;
+/** The attributes that hold a shape's coordinates. */
+const COORDINATE_ATTRIBUTES = ['x', 'y', 'width', 'height', 'cx', 'cy', 'r', 'rx', 'ry', 'x1', 'y1', 'x2', 'y2', 'points', 'd'];
 
 /**
- * Returns an element as it is now, as the start of a change.
+ * Returns an element as it is now, as the start of a change; its matrices are the identity and
+ * its box null when the view shows no element for it (a hidden section of the example view).
  * @param {number} index - the element.
  * @returns {ShapeSnapshot} the snapshot.
  */
@@ -25,8 +31,8 @@ export function getSnapshot(index) {
     for (const attribute of model.attributes) attributes[attribute.name] = attribute.value;
     const view = state.viewEls[index];
     let matrix = new DOMMatrix();
-    try { const transform = view.transform && view.transform.baseVal.consolidate(); if (transform) matrix = createMatrix(transform.matrix); } catch (error) { /* no transform */ }
-    const parentMatrix = getElementToRootMatrix(view.parentNode && view.parentNode.nodeType === 1 ? view.parentNode : state.viewRoot);
+    try { const transform = view && view.transform && view.transform.baseVal.consolidate(); if (transform) matrix = createMatrix(transform.matrix); } catch (error) { /* no transform */ }
+    const parentMatrix = getElementToRootMatrix(view && view.parentNode && view.parentNode.nodeType === 1 ? view.parentNode : state.viewRoot);
     return { tag: model.localName, attributes, matrix, parentMatrix, box: getBox(index), index };
 }
 
@@ -66,6 +72,7 @@ function hasTransform(attributes) {
 function isGeometryEditable(snapshot, mode) {
     if (hasTransform(snapshot.attributes)) return false;
     const attributes = snapshot.attributes;
+    if (COORDINATE_ATTRIBUTES.some(name => hasTemplateTags(attributes[name], TEMPLATE_SYNTAX))) return false;
     /**
      * Tells whether the attributes with these names are missing or plain numbers.
      * @param {string[]} names - the attribute names.
@@ -96,6 +103,17 @@ function isGeometryEditable(snapshot, mode) {
  * @returns {Object<string, ?string>} the changed attributes.
  */
 export function getMovedAttributes(snapshot, dx, dy) {
+    return getChangeableAttributes(snapshot, buildMovedAttributes(snapshot, dx, dy));
+}
+
+/**
+ * Builds the attributes of a shape moved by (dx, dy) in its parent's coordinates.
+ * @param {ShapeSnapshot} snapshot - the shape at the start of the move.
+ * @param {number} dx - the shift to the right.
+ * @param {number} dy - the shift down.
+ * @returns {Object<string, ?string>} the changed attributes.
+ */
+function buildMovedAttributes(snapshot, dx, dy) {
     const attributes = snapshot.attributes;
     if (!isGeometryEditable(snapshot, 'move')) {
         const transform = formatMatrix(new DOMMatrix().translate(dx, dy).multiply(snapshot.matrix));
@@ -131,6 +149,17 @@ export function getMovedAttributes(snapshot, dx, dy) {
  * @returns {Object<string, ?string>} the changed attributes.
  */
 export function getScaledAttributes(snapshot, mapping, mode = 'resize') {
+    return getChangeableAttributes(snapshot, buildScaledAttributes(snapshot, mapping, mode));
+}
+
+/**
+ * Builds the attributes of a shape after a mapping (getScaledAttributes()).
+ * @param {ShapeSnapshot} snapshot - the shape at the start.
+ * @param {DOMMatrix} mapping - the mapping in the parent's coordinates.
+ * @param {string} mode - "resize" or "flip".
+ * @returns {Object<string, ?string>} the changed attributes.
+ */
+function buildScaledAttributes(snapshot, mapping, mode) {
     const isAxisAligned = Math.abs(mapping.b) < AXIS_TOLERANCE && Math.abs(mapping.c) < AXIS_TOLERANCE;
     if (!isAxisAligned || !isGeometryEditable(snapshot, mode)) {
         return { transform: formatMatrix(mapping.multiply(snapshot.matrix)) || null };
@@ -167,6 +196,17 @@ export function getScaledAttributes(snapshot, mapping, mode = 'resize') {
             return { x: formatNumber(x), y: formatNumber(y), width: formatNumber(width), height: formatNumber(height) };
         }
     }
+}
+
+/**
+ * Returns the attributes of a change that a geometry edit may set: those whose value at the start
+ * is free of template placeholders, so every placeholder stays as written.
+ * @param {ShapeSnapshot} snapshot - the shape at the start.
+ * @param {Object<string, ?string>} attributes - the changed attributes, name -> value.
+ * @returns {Object<string, ?string>} the attributes whose value at the start is free of placeholders.
+ */
+export function getChangeableAttributes(snapshot, attributes) {
+    return Object.fromEntries(Object.entries(attributes).filter(([name]) => !hasTemplateTags(snapshot.attributes[name], TEMPLATE_SYNTAX)));
 }
 
 /**

@@ -42,12 +42,13 @@ export function escapeText(text) {
 }
 
 /**
- * Escapes text for an attribute value in double quotes.
+ * Escapes text for an attribute value in quotes.
  * @param {string} text - the text.
- * @returns {string} the text with &, < and " escaped.
+ * @param {string} [quote] - the quote around the value, `"` or `'`.
+ * @returns {string} the text with &, < and the quote escaped.
  */
-export function escapeAttribute(text) {
-    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+export function escapeAttribute(text, quote = '"') {
+    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(quote === "'" ? /'/g : /"/g, quote === "'" ? '&apos;' : '&quot;');
 }
 
 /**

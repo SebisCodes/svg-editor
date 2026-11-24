@@ -69,10 +69,13 @@ Editor -> page (sent to the page around the editor, or to window.opener in its o
 - `svgeditor:closing` {id, name, unsaved, content?} - own window closes (always sent; content only when unsaved, id null before the first load)
 - `svgeditor:reload` {id, unsaved} - inside your page, F5 / Ctrl+R / Cmd+R do not reload the editor; ask the user yourself (Ctrl+W cannot be caught by a page)
 - `svgeditor:key-request` {reason:"missing"} - the editor has no AI key in this session yet
+- `svgeditor:ai-click` {request, id, name} - the user pressed the AI button (only with ai.dialog:"page"); answer within 300 ms
 
 `?embed=1&save=0` hides the editor's Save button (Ctrl+S still sends `svgeditor:save`) - for pages with their own Save button.
 
 `?theme=light`, `?theme=dark` or `?theme=auto` (with or without `embed`) fixes the color theme for that page load and hides the theme switch; the user's own stored choice is not changed. Other values are ignored.
+
+`?template=mustache` (or `?template=angle`) is for pages whose server fills placeholders into the SVG before it is used: `{{name}}`, `{{#name}} … {{/name}}`, `{{^name}} … {{/name}}` (with `angle`: `<<name>>`, `<<?name>> … <</?name>>`), in text and in quoted attribute values. The canvas shows the drawing filled with the examples the page sends (`svgeditor:template`, or `template` in `svgeditor:load`: placeholders with label, example, section state, list rows and example pictures), and with the switch "Template" the tags as text; a placeholder without an example shows its label in brackets. The code view shows the tags as written, a "Placeholders" box below the code puts a tag at the cursor, moving and resizing leave attributes with placeholders as written, and an address that holds a placeholder is never loaded (a picture shows an example picture or a placeholder picture; CSS with an escape that could spell an address is left out of the canvas). A section left open, a stray end tag, an end tag in the wrong order and a tag with a sign outside the syntax are errors in the code; Tidy up and Shrink keep the code of a drawing with placeholders as written; saving and every export carry the template. The two values `mustache` and `angle` switch it on.
 
 `?lang=de` shows the editor's interface in German (menus, buttons, dialogs, messages), `?lang=en` in English (the default). `/` leads to the browser's language, and a language picked in the menu holds for every giit.ch site. The AI prompt is always English.
 
@@ -80,7 +83,9 @@ Page -> editor (only from the page around the editor or the opener; after its fi
 - `svgeditor:load` {name, content, context?, hook?, ai?, from?, target?} - open your drawing; from:"ai" shows a note, target:"new" opens it as a separate drawing in the user's browser
 - `svgeditor:get` - answered with `svgeditor:save` of your drawing (id and content null before the first load)
 - `svgeditor:save` - press Save
-- `svgeditor:ai` {label?, prompt?, endpoint?, key?, base?} or {clear:true} - AI through your server
+- `svgeditor:ai` {label?, prompt?, endpoint?, key?, base?, answer?, dialog?} or {clear:true} or {decline:true, message?} - AI through your server
+- `svgeditor:ai-click` {request, handled} - the answer to ai-click: handled:true when your page shows its own AI dialog
+- `svgeditor:template` {placeholders, assets?} or {clear:true} - with ?template=: placeholders with examples and example pictures for the example view (kept in memory only)
 
 Your drawing is the one your page loaded (or opened with ?src=). change, save, closing and get are only ever about it - never about other drawings in the user's browser, also when the user opens them in the editor. A load replaces only a drawing that came from your page before (same name and origin), never the user's own; the AI settings and the hook from load apply only while your drawing is open. Your drawing is kept in memory only - it is never stored in the user's browser and is gone when the editor closes.
 
@@ -100,6 +105,8 @@ Fields left out keep their value; `{type:"svgeditor:ai", clear:true}` ends it. O
     {"editor":"svg","target":"current"|"new","name":"<short name>","content":"<the complete SVG>"}
 
 An AI that cannot send HTTP requests answers with a link instead, which the user pastes into the editor. When your server has a result, your page sends `{type:"svgeditor:load", name, content, from:"ai", target}`: target "current" (or none) puts it into your drawing (the user sees a note; Undo takes it back; it counts as not yet saved), target "new" opens a separate drawing that stays in the user's browser - its edits and Save never go to your page. The key stays valid in the editor for the whole session; only when it has none at "Copy prompt", the editor sends `{type:"svgeditor:key-request", reason:"missing"}`; answer with a `svgeditor:ai` message within 5 seconds.
+
+Your own parts (in `ai` of load or in `svgeditor:ai`): `answer:"<text>"` replaces the prompt's "HOW TO ANSWER" part with your text (fenced under "HOW TO ANSWER FROM THE WEBSITE <your host>"; the prompt then carries no endpoint and no key, and no key-request is sent), `answer:"none"` leaves the part out, `answer:""` gives the editor's part back (at most 4000 characters). `dialog:"page"`: a press on the AI button while your drawing is open sends `{type:"svgeditor:ai-click", request, id, name}` (no content) and waits 300 ms; answer `{type:"svgeditor:ai-click", request, handled:true}` with the same request and open your own dialog - `handled:false` or no answer opens the editor's dialog; `dialog:"editor"` or `clear` ends it. To decline a key-request, answer `{type:"svgeditor:ai", decline:true, message}`: the wait ends at once, the prompt asks for a link, and after copying the user sees "<your host>: <message>" as plain text on one line (at most 200 characters, in your page's language). In every prompt the drawing stands in a code fence longer than any run of backticks in it, below a line that marks it as data.
 
 Safety built in: key, endpoint and prompt are only taken from the page around the editor (after its first message, only from that origin), kept in memory, never stored and never sent by the editor itself - the key only goes into the prompt the user copies. The endpoint must be https on your page's own host (with or without www.) or a subdomain of it; others are refused. Keys must be 16-512 characters of A-Z a-z 0-9 . _ ~ + / = -.
 

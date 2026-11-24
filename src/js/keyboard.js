@@ -11,16 +11,16 @@
 import { state, elements, services } from './state.js?v=2';
 import { findElement } from './util.js?v=3';
 import { openDialog } from './dialogs.js?v=5';
-import { undo, redo } from './history.js?v=3';
-import { resizeToFit, setZoom, ZOOM_STEP } from './canvas.js?v=3';
-import { moveSelection } from './edits.js?v=3';
-import { removeSelection, copySelection, moveInDrawingOrder, FORWARD, BACKWARD, TO_FRONT, TO_BACK } from './structure.js?v=3';
-import { selectElement } from './selection.js?v=3';
-import { setTool } from './tools.js?v=3';
-import { saveOrDownload, applySnapSwitch, runGridButton } from './toolbar.js?v=3';
-import { openExportDialog } from './export-dialog.js?v=3';
-import { applyNewMenuSwitch, isNewMenuOpen } from './documents.js?v=3';
-import { TYPING } from './file-input.js?v=3';
+import { undo, redo } from './history.js?v=4';
+import { resizeToFit, setZoom, ZOOM_STEP } from './canvas.js?v=4';
+import { moveSelection } from './edits.js?v=4';
+import { removeSelection, copySelection, moveInDrawingOrder, FORWARD, BACKWARD, TO_FRONT, TO_BACK } from './structure.js?v=4';
+import { selectElement } from './selection.js?v=4';
+import { setTool } from './tools.js?v=4';
+import { saveOrDownload, applySnapSwitch, runGridButton } from './toolbar.js?v=4';
+import { openExportDialog } from './export-dialog.js?v=4';
+import { applyNewMenuSwitch, isNewMenuOpen } from './documents.js?v=4';
+import { TYPING } from './file-input.js?v=4';
 
 const BIG_STEP = 10;
 const HAND_CLASS = 'hand';

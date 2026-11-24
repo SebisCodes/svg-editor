@@ -28,9 +28,9 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="/img/logo.svg">
-<link rel="stylesheet" href="/css/style.css?v=42">
+<link rel="stylesheet" href="/css/style.css?v=43">
 <script src="/js/lang-menu.js?v=1" defer></script>
-<script src="/js/theme.js?v=10" data-editor-page></script>
+<script src="/js/theme.js?v=11" data-editor-page></script>
 <script type="application/ld+json"><?= get_json_ld('jsonld') ?></script>
 </head>
 <body>
@@ -103,6 +103,10 @@
                 <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" aria-label="SVG code"></textarea>
             </div>
         </div>
+        <div id="placeholder-box" class="placeholder-box template-control">
+            <div id="placeholder-list" class="placeholder-list" data-placeholder-list role="group" aria-label="Placeholders" hidden></div>
+            <button type="button" class="placeholder-header" data-placeholder-toggle aria-expanded="false" aria-controls="placeholder-list" title="The placeholders of the template - a click on one puts its tag at the cursor"><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg><span>Placeholders</span><span class="placeholder-count" data-placeholder-count data-no-i18n></span></button>
+        </div>
     </section>
 
     <div id="splitter" class="splitter" role="separator" aria-orientation="vertical" aria-label="Drag to change the width of the code area" title="Drag to change the width" tabindex="0"></div>
@@ -123,6 +127,10 @@
                 <button type="button" class="tool with-text" id="grid-show" title="Show the grid and snap shapes to it (#)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg><span>Grid</span></button>
                 <label class="grid-size" title="Distance between grid lines, in the drawing's units"><span>Spacing</span><input id="grid-size" type="number" min="0.1" step="0.1" value="10" inputmode="decimal"></label>
                 <label class="snap" title="Shapes jump onto the grid lines when moved or drawn (G)"><input type="checkbox" id="grid-snap"> Snap</label>
+            </div>
+            <div id="view-switch" class="view-switch template-control" role="radiogroup" aria-label="View of the drawing">
+                <button type="button" role="radio" data-view-set="example" aria-checked="true" title="The drawing filled with the examples">Examples</button>
+                <button type="button" role="radio" data-view-set="template" aria-checked="false" tabindex="-1" title="The template with its placeholders as written">Template</button>
             </div>
         </div>
         <div id="stage" class="stage" tabindex="0" aria-label="Canvas: click shapes, drag them, resize them with the handles">
@@ -145,10 +153,13 @@
                 <button type="button" class="tool" id="zoom-fit" title="Fit the drawing into the window (0)" aria-label="Fit to window"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
             </div>
             <div class="stale-hint" aria-hidden="true">The preview shows the last working version</div>
+            <div id="view-note" class="view-note template-control" role="status" hidden>The examples could not be filled in - the canvas shows the template</div>
         </div>
     </section>
 
-    <aside class="pane inspector" aria-label="Side panel">
+    <button type="button" class="tool panel-toggle" id="btn-panel" aria-controls="side-panel" aria-expanded="false" title="Show or hide the side panel" aria-label="Side panel"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></svg></button>
+
+    <aside class="pane inspector" id="side-panel" aria-label="Side panel">
         <div class="pane-header tabs" role="tablist">
             <button type="button" role="tab" data-itab="properties" aria-selected="true" title="Colors, size and position of the selected shape">Properties</button>
             <button type="button" role="tab" data-itab="structure" aria-selected="false" title="All elements of the drawing as a list">Layers</button>
@@ -351,6 +362,6 @@ addEventListener('message', e =&gt; {
 
 <?php include __DIR__ . '/footer.php'; ?>
 
-<script type="module" src="/js/app.js?v=64"></script>
+<script type="module" src="/js/app.js?v=65"></script>
 </body>
 </html>

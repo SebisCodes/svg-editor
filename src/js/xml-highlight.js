@@ -4,7 +4,7 @@
  */
 
 import { escapeText, getTagEnd, getDoctypeEnd, getMarkEnd, COMMENT_START, COMMENT_END, CDATA_START, CDATA_END,
-         INSTRUCTION_START, INSTRUCTION_END, DECLARATION_START } from './xml.js?v=5';
+         INSTRUCTION_START, INSTRUCTION_END, DECLARATION_START } from './xml.js?v=6';
 
 const ENTITY = /&#?[\w.-]+;/g;
 const ATTRIBUTE_TOKEN = /(\s+)|([^\s=/>"']+)|(=)|("[^"]*"?|'[^']*'?)|(\/?>)|([\s\S])/g;

@@ -2,19 +2,24 @@
  * Changing an element's attributes and text. A change goes into the parsed element and the
  * view at once; its start tag is written into the code a moment later (writeChangedTags()),
  * so a drag rewrites the code once per frame and not once per attribute. Only the start tags
- * that changed are rewritten: the rest of the code keeps its formatting.
+ * that changed are rewritten: the rest of the code keeps its formatting. Template tags in values
+ * and texts are written as they are (svg-template.js).
  */
 
 import { state } from './state.js?v=2';
-import { escapeText } from './xml.js?v=5';
+import { escapeText } from './xml.js?v=6';
+import { escapeTextOutsideTemplateTags } from './template-tags.js?v=2';
 import { parseStyle, formatStyle, formatMatrix } from './svg-values.js?v=3';
-import { getStartTag, formatSvg } from './xml-write.js?v=2';
+import { getStartTag, formatSvg } from './xml-write.js?v=3';
+import { hasTemplateTags, TEMPLATE_SYNTAX, TEMPLATE_FORMAT_NOTE, TEMPLATE_STYLE_NOTE } from './svg-template.js?v=1';
 import { showToast, FIX_ERROR_FIRST } from './util.js?v=3';
-import { isSafeForView } from './view-safety.js?v=2';
-import { setCode, addHistoryStep } from './history.js?v=3';
-import { drawOverlay } from './overlay.js?v=3';
-import { renderInspector } from './inspector.js?v=3';
-import { getSnapshot, getMovedAttributes, getScaledAttributes, getParentMapping, getParentDelta } from './geometry.js?v=3';
+import { isSafeForView, getPlaceholderViewValue } from './view-safety.js?v=3';
+import { setCode, addHistoryStep } from './history.js?v=4';
+import { drawOverlay } from './overlay.js?v=4';
+import { renderInspector } from './inspector.js?v=4';
+import { getSnapshot, getMovedAttributes, getScaledAttributes, getParentMapping, getParentDelta, getChangeableAttributes } from './geometry.js?v=4';
+import { isExampleViewShown } from './drawing-views.js?v=1';
+import { renderDrawing } from './view.js?v=4';
 
 const WRITE_DELAY = 50;                     // milliseconds before changed start tags go into the code
 const MOVE_HISTORY_DELAY = 400;             // milliseconds of rest before key moves become an undo step
@@ -38,7 +43,8 @@ export function showFixErrorFirst() {
 
 /**
  * Sets attributes of an element in the parsed drawing and the view; the start tag follows in
- * the code shortly. An event handler or javascript: address is not copied into the view.
+ * the code shortly. An event handler or javascript: address is not copied into the view, and a
+ * reference that holds a template placeholder shows in the view as view-safety.js shows it.
  * @param {number} index - the element.
  * @param {Object<string, ?string>} attributes - name -> value; null or "" removes the attribute.
  * @returns {void}
@@ -50,7 +56,8 @@ export function setAttributes(index, attributes) {
         if (value == null || value === '') { model.removeAttribute(name); view && view.removeAttribute(name); continue; }
         model.setAttribute(name, value);
         if (!view) continue;
-        if (isSafeForView(name, value)) view.setAttribute(name, value); else view.removeAttribute(name);
+        const shown = getPlaceholderViewValue(view, name, value);
+        if (shown !== null && isSafeForView(name, shown)) view.setAttribute(name, shown); else view.removeAttribute(name);
     }
     state.changedIndexes.add(index);
     if (!state.writeTimer) state.writeTimer = setTimeout(writeChangedTags, WRITE_DELAY);
@@ -67,26 +74,39 @@ export function writeChangedTags() {
     if (!state.changedIndexes.size) return;
     const indexes = [...state.changedIndexes];
     state.changedIndexes.clear();
-    if (!state.isMapped) { setCode(formatSvg(state.doc, state.code), { reparse: false, history: false }); return; }
+    if (!state.isMapped) { writeTidiedDrawing(); return; }
     let code = state.code;
     const bottomUp = indexes.map(index => state.scanEls[index]).filter(Boolean).sort((first, second) => second.start - first.start);
     for (const tag of bottomUp) {
         const written = code.slice(tag.start, tag.tagEnd);
         const lineIndent = /\n([ \t]+)\S/.exec(written);
-        const newTag = getStartTag(state.modelEls[tag.index], tag.selfClose, lineIndent ? lineIndent[1] : null);
+        const newTag = getStartTag(state.modelEls[tag.index], tag.selfClose, lineIndent ? lineIndent[1] : null, TEMPLATE_SYNTAX);
         code = code.slice(0, tag.start) + newTag + code.slice(tag.tagEnd);
     }
     setCode(code, { reparse: false, history: false });
 }
 
 /**
- * Ends a change: the code now, an undo step, the properties anew.
+ * Writes the whole drawing tidied, when the code and the parsed drawing do not match one to one;
+ * a template keeps its code as written and the change stays on the canvas until the next reading.
+ * @returns {void}
+ */
+function writeTidiedDrawing() {
+    if (hasTemplateTags(state.code, TEMPLATE_SYNTAX)) { showToast(TEMPLATE_FORMAT_NOTE); return; }
+    setCode(formatSvg(state.doc, state.code), { reparse: false, history: false });
+}
+
+/**
+ * Ends a change: the code at once, an undo step, the properties anew. In the example view the
+ * drawing is read again, so every element that stands for the changed one (a list repeats it)
+ * shows the change.
  * @returns {void}
  */
 export function applyChange() {
     writeChangedTags();
     addHistoryStep();
-    renderInspector();
+    if (isExampleViewShown()) renderDrawing();
+    else renderInspector();
 }
 
 /**
@@ -130,9 +150,10 @@ export function addRotation(degrees) {
     if (hasCodeError()) { showFixErrorFirst(); return; }
     const snapshot = getSnapshot(state.sel);
     const box = snapshot.box;
+    if (!box) return;
     const centerX = box.x + box.w / 2, centerY = box.y + box.h / 2;
     const rotation = new DOMMatrix().translate(centerX, centerY).rotate(degrees).translate(-centerX, -centerY);
-    setAttributes(state.sel, { transform: formatMatrix(getParentMapping(snapshot, rotation).multiply(snapshot.matrix)) || null });
+    setAttributes(state.sel, getChangeableAttributes(snapshot, { transform: formatMatrix(getParentMapping(snapshot, rotation).multiply(snapshot.matrix)) || null }));
     applyChange();
     drawOverlay();
 }
@@ -147,6 +168,7 @@ export function addMirror(isHorizontal) {
     if (hasCodeError()) { showFixErrorFirst(); return; }
     const snapshot = getSnapshot(state.sel);
     const box = snapshot.box;
+    if (!box) return;
     const centerX = box.x + box.w / 2, centerY = box.y + box.h / 2;
     const mirror = new DOMMatrix().translate(centerX, centerY).scale(isHorizontal ? -1 : 1, isHorizontal ? 1 : -1).translate(-centerX, -centerY);
     setAttributes(state.sel, getScaledAttributes(snapshot, getParentMapping(snapshot, mirror), 'flip'));
@@ -183,15 +205,18 @@ export function getComputedValue(index, property) {
 
 /**
  * Sets a presentation property where it is written: in the style attribute when it is set
- * there, else as an attribute.
+ * there, else as an attribute. A style attribute that holds template placeholders stays as
+ * written, and the editor says so.
  * @param {number} index - the element.
  * @param {string} property - e.g. "fill".
  * @param {?string} value - the value, null to remove it.
  * @returns {void}
  */
 export function setProperty(index, property, value) {
-    const style = parseStyle(state.modelEls[index].getAttribute('style'));
+    const written = state.modelEls[index].getAttribute('style');
+    const style = parseStyle(written);
     if (!style.has(property)) { setAttributes(index, { [property]: value }); return; }
+    if (hasTemplateTags(written, TEMPLATE_SYNTAX)) { showToast(TEMPLATE_STYLE_NOTE); return; }
     if (value == null) style.delete(property); else style.set(property, value);
     setAttributes(index, { style: style.size ? formatStyle(style) : null });
 }
@@ -210,8 +235,9 @@ export function setText(index, text) {
     model.textContent = text;
     if (view) view.textContent = text;
     let code = state.code;
-    if (tag.selfClose) code = code.slice(0, tag.start) + getStartTag(model, false) + escapeText(text) + `</${model.tagName}>` + code.slice(tag.end);
-    else code = code.slice(0, tag.inner[0]) + escapeText(text) + code.slice(tag.inner[1]);
+    const written = escapeTextOutsideTemplateTags(text, TEMPLATE_SYNTAX, escapeText);
+    if (tag.selfClose) code = code.slice(0, tag.start) + getStartTag(model, false, null, TEMPLATE_SYNTAX) + written + `</${model.tagName}>` + code.slice(tag.end);
+    else code = code.slice(0, tag.inner[0]) + written + code.slice(tag.inner[1]);
     setCode(code, { reparse: false, history: false });
     clearTimeout(state.historyTimer);
     state.historyTimer = setTimeout(addHistoryStep, TEXT_HISTORY_DELAY);

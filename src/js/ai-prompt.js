@@ -8,6 +8,8 @@
  * origin) and fenced, so the AI can tell it apart from what the user writes.
  */
 
+import { formatSiteText, formatDocumentData, formatAnswerPart } from './prompt-parts.js?v=1';
+
 const SITE = 'https://svg.giit.ch/';
 const OTHER_NAMES_LIMIT = 40;
 
@@ -48,25 +50,13 @@ export const PROMPT_HEAD = `${PROMPT_BASE}\n\n${PROMPT_SAVING}`;
  */
 
 /**
- * Returns text from the website, marked with where it comes from and fenced.
- * @param {string} head - the heading, e.g. "RULES".
- * @param {string} [site] - the host of the page's real origin.
- * @param {string} [label] - the page's name for itself.
- * @param {string} text - the text.
- * @returns {string} the marked text.
- */
-function getSiteText(head, site, label, text) {
-    return `${head} ${site ? `FROM THE WEBSITE ${site}` : 'FROM THE WEBSITE'}${label && label !== site ? ` ("${label}")` : ''}\n\`\`\`text\n${text.replace(/`{3,}/g, "'''")}\n\`\`\``;
-}
-
-/**
  * Returns the part about the page that opened the editor and saves the drawing.
  * @param {PageContext} context - what the page tells the AI.
  * @returns {string} the text.
  */
 function getContextText(context) {
     return `THIS DRAWING BELONGS TO ${context.host ? `"${context.host}"` : 'a website'}${context.title ? ` ("${context.title}")` : ''}
-That page opened the editor and gets every saved version back by itself when I click Save (or press Ctrl+S) - nothing to set up and no server to build. Keep the drawing working with that page.${context.rules ? `\n\n${getSiteText('RULES', context.site, context.host, context.rules)}` : ''}`;
+That page opened the editor and gets every saved version back by itself when I click Save (or press Ctrl+S) - nothing to set up and no server to build. Keep the drawing working with that page.${context.rules ? `\n\n${formatSiteText('RULES', context.site, context.host, context.rules)}` : ''}`;
 }
 
 /**
@@ -84,19 +74,21 @@ function getRemotePrompt(promptState, remote, makeNew) {
     if (remote.base) {
         parts.push(`You write for my SVG editor ${SITE}, inside the website "${remote.label}".\nWrite the complete SVG: <svg xmlns="http://www.w3.org/2000/svg" viewBox="…">, well-formed XML, shapes with an id. Keep my work unless I ask otherwise.`);
     }
-    if (remote.prompt) parts.push(getSiteText('INSTRUCTIONS', remote.site, remote.label, remote.prompt));
-    if (promptState.context && promptState.context.rules) parts.push(getSiteText('RULES', remote.site, remote.label, promptState.context.rules));
+    if (remote.prompt) parts.push(formatSiteText('INSTRUCTIONS', remote.site, remote.label, remote.prompt));
+    if (promptState.context && promptState.context.rules) parts.push(formatSiteText('RULES', remote.site, remote.label, promptState.context.rules));
     const what = makeNew ? `Make a NEW drawing; leave "${promptState.name}" as it is.` : `Change my drawing "${promptState.name}".`;
     const link = `${SITE}#b64=<base64url of the UTF-8 SVG>${makeNew ? '&file=new&name=<short name>' : ''}`;
-    if (remote.endpoint && remote.key) parts.push(`HOW TO ANSWER
+    const editorAnswer = remote.endpoint && remote.key ? `HOW TO ANSWER
 ${what} Send the result with one HTTP request (run it, do not only show it):
   POST ${remote.endpoint}
   Authorization: Bearer ${remote.key}
   Content-Type: application/json
   {"editor":"svg","target":"${target}","name":"<short name>","content":"<the complete SVG>"}
 Build the JSON with a JSON library. The result then opens in my editor; tell me briefly what you did, or the server's error message.
-If you cannot send HTTP requests, give me the link ${link} and I paste your answer into the editor.`);
-    else parts.push(`HOW TO ANSWER\n${what} Give me the link ${link}; I paste your answer into the editor (a clicked link does not reach it).`);
+If you cannot send HTTP requests, give me the link ${link} and I paste your answer into the editor.`
+        : `HOW TO ANSWER\n${what} Give me the link ${link}; I paste your answer into the editor (a clicked link does not reach it).`;
+    const answer = formatAnswerPart(remote, editorAnswer);
+    if (answer) parts.push(answer);
     return parts.join('\n\n');
 }
 
@@ -130,5 +122,5 @@ export function getPrompt(promptState, makeNew) {
         : `Unless I say otherwise in my request, change "${name}" (&file=${encodeURIComponent(name)}).`;
     let drawingHead = makeNew ? `MY OPEN DRAWING "${name}" (for reference only - do not change it)` : `MY CURRENT DRAWING "${name}"`;
     if (promptState.remote) drawingHead = `MY ${makeNew ? 'CURRENT' : ''} DRAWING "${name}"`.replace('  ', ' ');
-    return `${getPromptHead(promptState, makeNew)}\n\n${promptState.remote ? '' : `${list}\n${goal}\n\n`}${drawingHead}${promptState.sel ? ` (I have selected: ${promptState.sel})` : ''}\n\`\`\`svg\n${promptState.svg.trim()}\n\`\`\`\n\nMy request: `;
+    return `${getPromptHead(promptState, makeNew)}\n\n${promptState.remote ? '' : `${list}\n${goal}\n\n`}${drawingHead}${promptState.sel ? ` (I have selected: ${promptState.sel})` : ''}\n${formatDocumentData('svg', promptState.svg.trim())}\n\nMy request: `;
 }

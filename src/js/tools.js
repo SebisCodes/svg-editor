@@ -10,13 +10,14 @@
  */
 
 import { state, elements } from './state.js?v=2';
-import { SVGNS } from './xml.js?v=5';
+import { SVGNS } from './xml.js?v=6';
 import { formatNumber } from './svg-values.js?v=3';
 import { findElement, findElements } from './util.js?v=3';
-import { getSnapped } from './canvas.js?v=3';
-import { drawOverlay } from './overlay.js?v=3';
+import { getSnapped } from './canvas.js?v=4';
+import { drawOverlay } from './overlay.js?v=4';
 import { updateHint } from './hint.js?v=3';
-import { addMarkup } from './structure.js?v=3';
+import { addMarkup } from './structure.js?v=4';
+import { showSidePanel } from './layout.js?v=4';
 
 /** The tag each drawing tool makes. */
 const TOOL_TAGS = { rect: 'rect', ellipse: 'ellipse', line: 'line', pen: 'path', text: 'text' };
@@ -80,7 +81,7 @@ export function startDraw(event, point) {
 }
 
 /**
- * Adds a text at a point and puts the cursor in its text field.
+ * Adds a text at a point and puts the cursor in its text field (the side panel opens for it).
  * @param {number} x - the x in root coordinates, snapped.
  * @param {number} y - the y, snapped.
  * @returns {void}
@@ -90,7 +91,19 @@ function addText(x, y) {
     const attributes = { x: formatNumber(x), y: formatNumber(y), 'font-family': TEXT_FONT, 'font-size': fontSize, ...getDrawStyle('text') };
     const index = addMarkup(`<text ${getAttributeText(attributes)}>Text</text>`);
     setTool('select');
-    if (index > 0) setTimeout(() => { const field = findElement('#f-text'); if (field) { field.focus(); field.select(); } }, TEXT_FOCUS_DELAY);
+    if (index > 0) setTimeout(showTextField, TEXT_FOCUS_DELAY);
+}
+
+/**
+ * Opens the side panel and puts the cursor in the text field of the selected text.
+ * @returns {void}
+ */
+function showTextField() {
+    const field = findElement('#f-text');
+    if (!field) return;
+    showSidePanel(true);
+    field.focus();
+    field.select();
 }
 
 /**

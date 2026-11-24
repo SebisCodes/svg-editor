@@ -9,17 +9,18 @@
 
 import { state, elements, services } from './state.js?v=2';
 import { findElement, findElements, showToast, getSafeFileName, FIX_ERROR_FIRST, SVG_TYPE } from './util.js?v=3';
-import { formatSvg, compressSvg } from './xml-write.js?v=2';
-import { saveDownload } from './export.js?v=6';
+import { formatSvg, compressSvg } from './xml-write.js?v=3';
+import { hasTemplateTags, TEMPLATE_SYNTAX, TEMPLATE_FORMAT_NOTE } from './svg-template.js?v=1';
+import { saveDownload } from './export.js?v=7';
 import { openDialog } from './dialogs.js?v=5';
-import { setCode, undo, redo } from './history.js?v=3';
-import { resizeToFit, setZoom, ZOOM_STEP } from './canvas.js?v=3';
-import { drawOverlay } from './overlay.js?v=3';
+import { setCode, undo, redo } from './history.js?v=4';
+import { resizeToFit, setZoom, ZOOM_STEP } from './canvas.js?v=4';
+import { drawOverlay } from './overlay.js?v=4';
 import { updateHint } from './hint.js?v=3';
-import { saveState } from './autosave.js?v=3';
-import { writeChangedTags } from './edits.js?v=3';
-import { setTool } from './tools.js?v=3';
-import { openExportDialog } from './export-dialog.js?v=3';
+import { saveState } from './autosave.js?v=4';
+import { writeChangedTags } from './edits.js?v=4';
+import { setTool } from './tools.js?v=4';
+import { openExportDialog } from './export-dialog.js?v=4';
 
 
 let gridShow = null, gridSize = null, gridSnap = null, backgroundSelect = null;
@@ -106,22 +107,26 @@ export function updateGridUi() {
 }
 
 /**
- * Tidies the code: one element per line, indented.
+ * Tidies the code: one element per line, indented. A drawing with template placeholders keeps
+ * its code as written.
  * @returns {void}
  */
 function formatCode() {
     if (state.error) { showToast(FIX_ERROR_FIRST); return; }
+    if (hasTemplateTags(state.code, TEMPLATE_SYNTAX)) { showToast(TEMPLATE_FORMAT_NOTE); return; }
     writeChangedTags();
     setCode(formatSvg(state.doc, state.code), { select: state.sel });
     showToast('Code tidied up');
 }
 
 /**
- * Shrinks the code: no comments, no white space between tags.
+ * Shrinks the code: no comments, no white space between tags. A drawing with template
+ * placeholders keeps its code as written.
  * @returns {void}
  */
 function compressCode() {
     if (state.error) { showToast(FIX_ERROR_FIRST); return; }
+    if (hasTemplateTags(state.code, TEMPLATE_SYNTAX)) { showToast(TEMPLATE_FORMAT_NOTE); return; }
     writeChangedTags();
     const before = new Blob([state.code]).size;
     const compressed = compressSvg(state.doc);

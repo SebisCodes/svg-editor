@@ -37,7 +37,7 @@ with sync_playwright() as p:
     pg = ctx.new_page()
     errors = []
     pg.on('pageerror', lambda e: errors.append(str(e)))
-    pg.goto(URL); pg.evaluate('localStorage.clear()'); pg.reload(); pg.wait_for_timeout(400)
+    pg.goto(URL); pg.evaluate('localStorage.clear()'); pg.reload(); pg.wait_for_function('window.svgEditor && svgEditor.state.viewRoot'); pg.wait_for_timeout(400)
     cdp = ctx.new_cdp_session(pg)
 
     def move_finger(a, z, steps=10):

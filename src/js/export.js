@@ -1,13 +1,17 @@
 /**
  * Reading the code as SVG and everything the editor writes out of a drawing: its natural
  * size, the export variants (SVG as written, tidied and shrunk, data URI, base64, CSS, HTML
- * <img>, React), a raster image (PNG, JPEG, WebP) and a file to download.
+ * <img>, React), a raster image (PNG, JPEG, WebP) and a file to download. A template with
+ * placeholders keeps its code as written in the text formats, and a reference that holds a
+ * placeholder shows the placeholder picture in a raster image (view-safety.js).
  */
 
-import { SVGNS, escapeAttribute } from './xml.js?v=5';
-import { formatSvg, compressSvg, convertToXml } from './xml-write.js?v=2';
-import { convertToJsx } from './jsx.js?v=3';
+import { SVGNS, escapeAttribute } from './xml.js?v=6';
+import { formatSvg, compressSvg, convertToXml } from './xml-write.js?v=3';
+import { convertToJsx } from './jsx.js?v=4';
 import { formatNumber } from './svg-values.js?v=3';
+import { setPlaceholderReferences } from './view-safety.js?v=3';
+import { hasTemplateTags } from './svg-template.js?v=1';
 
 /** Pixels per unit of the CSS units a width or height can have. */
 const UNITS = { px: 1, pt: 4 / 3, pc: 16, mm: 96 / 25.4, cm: 96 / 2.54, in: 96, em: 16, rem: 16 };
@@ -26,6 +30,7 @@ const URI_UNSAFE = /[\r\n%#()<>?[\\\]^`{|}]/g;
  * @property {?number} [col] - the column, 1-based.
  * @property {string} msg - the message.
  * @property {string} [fix] - "xmlns" when the namespace is missing.
+ * @property {boolean} [isTemplate] - true for a placeholder error of a template, whose message the interface translates.
  */
 
 /**
@@ -116,10 +121,13 @@ function getParseError(text) {
  * @param {XMLDocument} doc - the parsed drawing.
  * @param {string} code - its code as in the editor.
  * @param {string} name - its name, for the alt text and the component's name.
+ * @param {?import('./template-tags.js').TemplateSyntax} [syntax=null] - the template syntax; a code with
+ *     its tags stays as written in the tidied and shrunk formats. Null for plain SVG.
  * @returns {ExportVariants} the formats.
  */
-export function getExportVariants(doc, code, name) {
-    const mini = compressSvg(doc);
+export function getExportVariants(doc, code, name, syntax = null) {
+    const isTemplate = hasTemplateTags(code, syntax);
+    const mini = isTemplate ? code.trim() : compressSvg(doc);
     // " becomes ' (shorter) only when the drawing has no ' of its own; otherwise it is percent-encoded, so nothing changes.
     const encoded = mini.replace(URI_UNSAFE, encodeURIComponent);
     const uri = 'data:image/svg+xml,' + (mini.includes("'") ? encoded.replace(/"/g, '%22') : encoded.replace(/"/g, "'"));
@@ -127,7 +135,7 @@ export function getExportVariants(doc, code, name) {
     const natural = getNaturalSize(doc.documentElement);
     return {
         svg: code,
-        pretty: formatSvg(doc, code),
+        pretty: isTemplate ? code : formatSvg(doc, code),
         mini,
         uri,
         b64,
@@ -149,6 +157,7 @@ export function getExportVariants(doc, code, name) {
  */
 export function convertToImage(doc, width, height, type = 'image/png', background = null, quality = RASTER_QUALITY) {
     const root = doc.documentElement.cloneNode(true);
+    [root, ...root.querySelectorAll('*')].forEach(setPlaceholderReferences);
     const natural = getNaturalSize(doc.documentElement);
     if (!getViewBox(root)) root.setAttribute('viewBox', `0 0 ${formatNumber(natural.w)} ${formatNumber(natural.h)}`);
     root.setAttribute('width', width);

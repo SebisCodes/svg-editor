@@ -7,12 +7,13 @@
  */
 
 import { state, elements } from './state.js?v=2';
-import { parseTags, getElementIndexAt } from './xml.js?v=5';
-import { renderCode, syncLayerScroll } from './code-view.js?v=3';
-import { renderDrawing } from './view.js?v=3';
-import { saveState } from './autosave.js?v=3';
-import { addHistoryStep, undo, redo } from './history.js?v=3';
-import { selectElement } from './selection.js?v=3';
+import { getElementIndexAt } from './xml.js?v=6';
+import { parseCodeTags, TEMPLATE_SYNTAX } from './svg-template.js?v=1';
+import { renderCode, syncLayerScroll } from './code-view.js?v=4';
+import { renderDrawing } from './view.js?v=4';
+import { saveState } from './autosave.js?v=4';
+import { addHistoryStep, undo, redo } from './history.js?v=4';
+import { selectElement } from './selection.js?v=4';
 
 const PARSE_DELAY = 250;                    // milliseconds of rest before the drawing is read again
 const HISTORY_DELAY = 600;                  // milliseconds of rest before typing becomes an undo step
@@ -61,7 +62,7 @@ export function stopParseTimer() {
  */
 function updateFromTyping() {
     state.code = elements.ta.value;
-    state.scanEls = parseTags(state.code);
+    state.scanEls = parseCodeTags(state.code, TEMPLATE_SYNTAX);
     renderCode();
     clearTimeout(parseTimer);
     parseTimer = setTimeout(() => { renderDrawing(); saveState(); }, PARSE_DELAY);
@@ -91,7 +92,7 @@ function selectAtCursor() {
  * @param {number} [selectionEnd] - the end of a selection, the cursor alone when left out.
  * @returns {void}
  */
-function editCodeRange(start, end, text, selectionStart, selectionEnd) {
+export function editCodeRange(start, end, text, selectionStart, selectionEnd) {
     const field = elements.ta;
     field.setSelectionRange(start, end);
     if (!document.execCommand || !document.execCommand('insertText', false, text)) {

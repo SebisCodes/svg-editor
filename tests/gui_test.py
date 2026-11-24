@@ -34,6 +34,9 @@ def check_that(name, cond, info=''):
     print(('PASS ' if cond else 'FAIL ') + name + (('  -- ' + str(info)) if (info and not cond) else ''))
 
 
+# The parts of the side panel: a step that uses one opens the drawer first.
+PANEL_PARTS = ('#inspector-body', '[data-itab', '#tree', '#f-text', '#side-panel')
+
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path='/usr/bin/google-chrome', headless=True)
     ctx = b.new_context(viewport={'width':1440,'height':900}, accept_downloads=True, permissions=['clipboard-read','clipboard-write'])
@@ -42,6 +45,50 @@ with sync_playwright() as p:
     pg.on('console', lambda m: errs.append(m.text) if m.type == 'error' else None)
     pg.on('pageerror', lambda e: errs.append('PAGEERROR ' + str(e)))
     pg.goto(URL); pg.evaluate('localStorage.clear()'); pg.reload(); pg.wait_for_timeout(600)
+    check_that('Side panel closed at start', pg.get_attribute('#btn-panel', 'aria-expanded') == 'false' and not pg.is_visible('#side-panel'))
+    pg.click('#btn-panel'); pg.wait_for_timeout(100)
+    check_that('Side panel opens with its button', pg.is_visible('#side-panel'))
+    pg.click('#btn-panel'); pg.wait_for_timeout(100)
+
+    def show_side_panel(is_open):
+        """Opens or closes the side panel's drawer, which lies over the right of the canvas.
+
+        Args:
+            is_open (bool): True to open it, False to close it.
+
+        Returns:
+            None: the drawer is open or closed.
+        """
+        if pg.is_visible('#btn-panel') and (pg.get_attribute('#btn-panel', 'aria-expanded') == 'true') != is_open:
+            pg.locator('#btn-panel').click(); pg.wait_for_timeout(100)
+
+    def open_panel_for(method):
+        """Wraps a page method so a selector inside the side panel opens the drawer first.
+
+        Args:
+            method (callable): the page method, called with a selector first.
+
+        Returns:
+            callable: the wrapped method.
+        """
+        def run(selector, *args, **kwargs):
+            """Opens the drawer for a selector inside the side panel, then runs the method.
+
+            Args:
+                selector (str): the selector.
+                args (tuple): further arguments of the method.
+                kwargs (dict): further keyword arguments of the method.
+
+            Returns:
+                object: what the method returns.
+            """
+            if isinstance(selector, str) and any(part in selector for part in PANEL_PARTS):
+                show_side_panel(True)
+            return method(selector, *args, **kwargs)
+        return run
+
+    for method_name in ('click', 'dblclick', 'fill', 'select_option', 'inner_text', 'is_visible', 'focus', 'press', 'input_value', 'get_attribute'):
+        setattr(pg, method_name, open_panel_for(getattr(pg, method_name)))
 
     def get_code():
         """Return the code of the open drawing.
@@ -79,6 +126,7 @@ with sync_playwright() as p:
         Returns:
             list[float]: [x, y] of its center.
         """
+        show_side_panel(False)
         return pg.evaluate(f'''(() => {{ const el = {selector_js}; const r = el.getBoundingClientRect(); return [r.left + r.width/2, r.top + r.height/2]; }})()''')
 
     def import_drawing(fn):
@@ -159,6 +207,7 @@ with sync_playwright() as p:
 
     # 3 Moving
     z = get_zoom()
+    show_side_panel(False)
     pg.mouse.move(x, y); pg.mouse.down(); pg.mouse.move(x + 50, y + 20, steps=6); pg.mouse.up()
     pg.wait_for_timeout(120)
     m = re.search(r'<circle cx="([\d.]+)" cy="([\d.]+)"', get_code())
@@ -496,7 +545,8 @@ with sync_playwright() as p:
     check_that('Mouse wheel zooms', get_zoom() > z0)
     px0 = pg.evaluate('svgEditor.state.panX')
     pg.keyboard.press('h')
-    pg.mouse.move(700, 300); pg.mouse.down(); pg.mouse.move(760, 300, steps=3); pg.mouse.up()
+    stage_box = pg.locator('#stage').bounding_box()
+    pg.mouse.move(stage_box['x'] + 100, stage_box['y'] + 200); pg.mouse.down(); pg.mouse.move(stage_box['x'] + 160, stage_box['y'] + 200, steps=3); pg.mouse.up()
     check_that('Hand tool pans the view', abs(pg.evaluate('svgEditor.state.panX') - px0 - 60) < 1)
     pg.keyboard.press('v')
 

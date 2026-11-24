@@ -6,12 +6,12 @@
 
 import { state } from './state.js?v=2';
 import { store } from './document-store.js?v=2';
-import { VIEWER } from './sync.js?v=23';
+import { VIEWER } from './sync.js?v=24';
 import { showToast } from './util.js?v=3';
-import { setCode } from './history.js?v=3';
-import { resizeToFit } from './canvas.js?v=3';
-import { writeChangedTags } from './edits.js?v=3';
-import { openDocument, createDocument, getBlankCode } from './documents.js?v=3';
+import { setCode } from './history.js?v=4';
+import { resizeToFit } from './canvas.js?v=4';
+import { writeChangedTags } from './edits.js?v=4';
+import { openDocument, createDocument, getBlankCode } from './documents.js?v=4';
 
 /** The name of an AI's drawing that comes without one. */
 export const AI_NAME = 'AI drawing';

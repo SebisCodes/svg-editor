@@ -7,10 +7,10 @@
 
 import { state } from './state.js?v=2';
 import { formatNumber } from './svg-values.js?v=3';
-import { getSnapped, getElementToRootMatrix } from './canvas.js?v=3';
-import { drawOverlay } from './overlay.js?v=3';
-import { setAttributes, setBox } from './edits.js?v=3';
-import { getMovedAttributes, getParentDelta } from './geometry.js?v=3';
+import { getSnapped, getElementToRootMatrix } from './canvas.js?v=4';
+import { drawOverlay } from './overlay.js?v=4';
+import { setAttributes, setBox } from './edits.js?v=4';
+import { getMovedAttributes, getParentDelta, getChangeableAttributes } from './geometry.js?v=4';
 
 const MOVE_THRESHOLD = 3;                   // pixels the pointer moves before a shape moves
 
@@ -68,7 +68,7 @@ export function resizeShape(drag, point, keepRatio) {
 function moveLineEnd(drag, point) {
     const [nameX, nameY] = drag.handle === 'p1' ? ['x1', 'y1'] : ['x2', 'y2'];
     const local = new DOMPoint(getSnapped(point.x), getSnapped(point.y)).matrixTransform(getElementToRootMatrix(state.viewEls[drag.snapshot.index]).inverse());
-    setAttributes(drag.snapshot.index, { [nameX]: formatNumber(local.x), [nameY]: formatNumber(local.y) });
+    setAttributes(drag.snapshot.index, getChangeableAttributes(drag.snapshot, { [nameX]: formatNumber(local.x), [nameY]: formatNumber(local.y) }));
 }
 
 /**

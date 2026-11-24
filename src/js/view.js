@@ -1,23 +1,31 @@
 /**
  * Reading the code and showing the drawing:
- *   1. parse the code (export.js) and find the places of its tags (xml.js);
+ *   1. parse the code (export.js) and find the places of its tags (xml.js); with a template
+ *      syntax the browser reads the tags as text and the parsed drawing gets them back as
+ *      written (svg-template.js), and a placeholder error counts as an error in the code;
  *   2. with an error: show it above the code and keep the last working view, marked stale;
- *   3. without: copy the parsed drawing, make the copy harmless (view-safety.js) and show it
- *      in the shadow root of the canvas;
- *   4. fit the drawing when its size changed, then draw the code, the overlay, the properties
- *      and the layers.
+ *   3. without: take the drawing to show (with a template syntax the example view or the
+ *      template view, drawing-views.js), copy it, make the copy harmless (view-safety.js) and
+ *      show it in the shadow root of the canvas, each element of the view led to its element of
+ *      the code;
+ *   4. fit the drawing when its size changed, then draw the code, the overlay, the properties,
+ *      the layers and the controls of template placeholders.
  */
 
 import { state, elements } from './state.js?v=2';
-import { parseTags, escapeText } from './xml.js?v=5';
-import { parse, getNaturalSize } from './export.js?v=6';
-import { disableActiveContent } from './view-safety.js?v=2';
-import { renderCode } from './code-view.js?v=3';
-import { resizeToFit, updatePaper } from './canvas.js?v=3';
-import { drawOverlay } from './overlay.js?v=3';
+import { parseTags, escapeText } from './xml.js?v=6';
+import { buildCheckedCode, getTemplateError, TEMPLATE_SYNTAX } from './svg-template.js?v=1';
+import { setMarkedTags } from './template-markers.js?v=1';
+import { parse, getNaturalSize } from './export.js?v=7';
+import { disableActiveContent } from './view-safety.js?v=3';
+import { renderCode } from './code-view.js?v=4';
+import { resizeToFit, updatePaper } from './canvas.js?v=4';
+import { drawOverlay } from './overlay.js?v=4';
 import { updateHint } from './hint.js?v=3';
-import { renderInspector, setInspectorRebuild } from './inspector.js?v=3';
-import { renderTree } from './layers.js?v=3';
+import { renderInspector, setInspectorRebuild } from './inspector.js?v=4';
+import { renderTree } from './layers.js?v=4';
+import { buildShownDrawing } from './drawing-views.js?v=1';
+import { renderTemplateControls } from './template-panel.js?v=1';
 
 const SIZE_TOLERANCE = 0.01;
 const STALE_CLASS = 'stale';
@@ -31,9 +39,12 @@ const SHADOW_CSS = `:host{all:initial;display:block;width:100%;height:100%}
  * @returns {void}
  */
 export function renderDrawing(select) {
-    const result = parse(state.code);
-    state.scanEls = parseTags(state.code);
-    if (result.error) { showStaleDrawing(result.error); return; }
+    const checked = buildCheckedCode(state.code, TEMPLATE_SYNTAX);
+    const result = parse(checked.text);
+    state.scanEls = parseTags(checked.text);
+    const error = result.error || getTemplateError(state.code, TEMPLATE_SYNTAX);
+    if (error) { showStaleDrawing(error); return; }
+    setMarkedTags(result.doc, checked.marking);
     state.error = null;
     showCodeError();
     updateHint();
@@ -42,8 +53,9 @@ export function renderDrawing(select) {
     const root = result.doc.documentElement;
     state.modelEls = [root, ...root.getElementsByTagName('*')];
     state.isMapped = state.modelEls.length === state.scanEls.length;
-    showView(root);
-    resizeToFitChanged(root);
+    const shown = buildShownDrawing(state.code, root, state.modelEls, state.scanEls);
+    showView(shown);
+    resizeToFitChanged(shown.root);
     if (select !== undefined) state.sel = select;
     if (state.sel >= state.modelEls.length || state.sel === 0) state.sel = -1;
     state.hoverIndex = -1;
@@ -51,6 +63,7 @@ export function renderDrawing(select) {
     drawOverlay();
     renderInspector();
     renderTree();
+    renderTemplateControls();
 }
 
 /**
@@ -70,22 +83,32 @@ function showStaleDrawing(error) {
 }
 
 /**
- * Shows a harmless copy of the parsed drawing in the shadow root. The copy is cleaned in the
- * parsed document, which loads and runs nothing; only then it goes into the page.
- * @param {Element} root - the root of the parsed drawing.
+ * Shows a harmless copy of the drawing to show in the shadow root. The copy is cleaned in the
+ * parsed document, which loads and runs nothing; only then it goes into the page. Element i of
+ * the code gets the first element of the view that stands for it (state.viewEls, null when none
+ * does), and every element of the view the index of its element of the code (state.viewIndex);
+ * the indexes are taken before the cleaning, which can empty an element.
+ * @param {import('./drawing-views.js').ShownDrawing} shown - the drawing to show.
  * @returns {void}
  */
-function showView(root) {
-    const copy = root.cloneNode(true);
+function showView(shown) {
+    const copy = shown.root.cloneNode(true);
+    const codeIndexByCopy = new Map([copy, ...copy.querySelectorAll('*')].map((element, index) => [element, shown.codeIndexes ? shown.codeIndexes[index] : index]));
     disableActiveContent(copy);
+    const codeIndexes = [copy, ...copy.querySelectorAll('*')].map(element => codeIndexByCopy.get(element));
     const view = document.importNode(copy, true);
     view.classList.add('root');
     const style = document.createElement('style');
     style.textContent = SHADOW_CSS;
     elements.shadowRoot.replaceChildren(style, view);
     state.viewRoot = view;
-    state.viewEls = [view, ...view.querySelectorAll('*')];
-    state.viewIndex = new WeakMap(state.viewEls.map((element, index) => [element, index]));
+    state.viewEls = state.modelEls.map(() => null);
+    state.viewIndex = new WeakMap();
+    [view, ...view.querySelectorAll('*')].forEach((element, index) => {
+        const codeIndex = codeIndexes[index];
+        state.viewIndex.set(element, codeIndex);
+        if (!state.viewEls[codeIndex]) state.viewEls[codeIndex] = element;
+    });
 }
 
 /**
@@ -110,6 +133,7 @@ export function showCodeError() {
     elements.error.hidden = !error;
     if (!error) return;
     const where = error.line ? `Line ${error.line}${error.col ? ', column ' + error.col : ''}: ` : '';
-    elements.error.innerHTML = `<b>Error in the code.</b> ${escapeText(where + error.msg)} <span class="muted">The preview shows the last working version.</span>`
+    const message = error.isTemplate ? `${escapeText(where.trimEnd())} <span>${escapeText(error.msg)}</span>` : escapeText(where + error.msg);
+    elements.error.innerHTML = `<b>Error in the code.</b> ${message} <span class="muted">The preview shows the last working version.</span>`
         + (error.fix === 'xmlns' ? ' <button type="button" class="button small" data-fix="xmlns">Add xmlns</button>' : '');
 }

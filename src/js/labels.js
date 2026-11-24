@@ -4,7 +4,7 @@
  * size.
  */
 
-import { escapeText } from './xml.js?v=5';
+import { escapeText } from './xml.js?v=6';
 
 /** A readable name for each tag. */
 export const LABELS = {
