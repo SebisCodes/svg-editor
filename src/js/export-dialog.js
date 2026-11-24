@@ -10,7 +10,7 @@ import { getExportVariants, convertToImage, saveDownload } from './export.js?v=8
 import { TEMPLATE_SYNTAX } from './svg-template.js?v=1';
 import { createZip } from './zip.js?v=4';
 import { openDialog } from './dialogs.js?v=5';
-import { writeChangedTags } from './edits.js?v=5';
+import { writeChangedTags } from './edits.js?v=6';
 
 const RASTER_FORMAT = /^(png|jpeg|webp)$/;
 const MAX_PIXELS = 16384;

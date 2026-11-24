@@ -8,9 +8,9 @@
 import { state, elements } from './state.js?v=2';
 import { findElement } from './util.js?v=3';
 import { TEMPLATE_SYNTAX } from './svg-template.js?v=1';
-import { editCodeRange } from './code-input.js?v=5';
-import { addHistoryStep } from './history.js?v=5';
-import { renderDrawing } from './view.js?v=5';
+import { editCodeRange } from './code-input.js?v=6';
+import { addHistoryStep } from './history.js?v=6';
+import { renderDrawing } from './view.js?v=6';
 import { startViewSwitch, showViewSwitch, showViewNote, createPlaceholderBox, getListedPlaceholders } from './template-controls.js?v=2';
 import { getViewMode, setViewMode, isExampleViewFailed, getTemplateExamples } from './drawing-views.js?v=2';
 

@@ -18,14 +18,14 @@ import { buildCheckedCode, getTemplateError, TEMPLATE_SYNTAX } from './svg-templ
 import { setMarkedTags } from './template-markers.js?v=1';
 import { parse, getNaturalSize } from './export.js?v=8';
 import { disableActiveContent } from './view-safety.js?v=4';
-import { renderCode } from './code-view.js?v=5';
-import { resizeToFit, updatePaper } from './canvas.js?v=5';
-import { drawOverlay } from './overlay.js?v=5';
+import { renderCode } from './code-view.js?v=6';
+import { resizeToFit, updatePaper } from './canvas.js?v=6';
+import { drawOverlay } from './overlay.js?v=6';
 import { updateHint } from './hint.js?v=3';
-import { renderInspector, setInspectorRebuild } from './inspector.js?v=5';
-import { renderTree } from './layers.js?v=5';
+import { renderInspector, setInspectorRebuild } from './inspector.js?v=6';
+import { renderTree } from './layers.js?v=6';
 import { buildShownDrawing } from './drawing-views.js?v=2';
-import { renderTemplateControls } from './template-panel.js?v=2';
+import { renderTemplateControls } from './template-panel.js?v=3';
 
 const SIZE_TOLERANCE = 0.01;
 const STALE_CLASS = 'stale';

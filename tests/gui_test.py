@@ -34,7 +34,7 @@ def check_that(name, cond, info=''):
     print(('PASS ' if cond else 'FAIL ') + name + (('  -- ' + str(info)) if (info and not cond) else ''))
 
 
-# The parts of the side panel: a step that uses one opens the drawer first.
+# The parts of the side panel: a step that uses one opens the side panel first.
 PANEL_PARTS = ('#inspector-body', '[data-itab', '#tree', '#f-text', '#side-panel')
 
 with sync_playwright() as p:
@@ -51,19 +51,19 @@ with sync_playwright() as p:
     pg.click('#btn-panel'); pg.wait_for_timeout(100)
 
     def show_side_panel(is_open):
-        """Opens or closes the side panel's drawer, which lies over the right of the canvas.
+        """Opens or closes the side panel's column right of the canvas.
 
         Args:
             is_open (bool): True to open it, False to close it.
 
         Returns:
-            None: the drawer is open or closed.
+            None: the side panel is open or closed.
         """
         if pg.is_visible('#btn-panel') and (pg.get_attribute('#btn-panel', 'aria-expanded') == 'true') != is_open:
             pg.locator('#btn-panel').click(); pg.wait_for_timeout(100)
 
     def open_panel_for(method):
-        """Wraps a page method so a selector inside the side panel opens the drawer first.
+        """Wraps a page method so a selector inside the side panel opens the side panel first.
 
         Args:
             method (callable): the page method, called with a selector first.
@@ -72,7 +72,7 @@ with sync_playwright() as p:
             callable: the wrapped method.
         """
         def run(selector, *args, **kwargs):
-            """Opens the drawer for a selector inside the side panel, then runs the method.
+            """Opens the side panel for a selector inside the side panel, then runs the method.
 
             Args:
                 selector (str): the selector.
@@ -206,8 +206,10 @@ with sync_playwright() as p:
     check_that('Code marks start tag', '<circle' in pg.inner_text('#marks mark.sel'))
 
     # 3 Moving
-    z = get_zoom()
     show_side_panel(False)
+    pg.wait_for_timeout(150)
+    z = get_zoom()
+    x, y = get_center(get_view_expression('circle'))
     pg.mouse.move(x, y); pg.mouse.down(); pg.mouse.move(x + 50, y + 20, steps=6); pg.mouse.up()
     pg.wait_for_timeout(120)
     m = re.search(r'<circle cx="([\d.]+)" cy="([\d.]+)"', get_code())
@@ -819,6 +821,51 @@ with sync_playwright() as p:
     dp.goto(URL); dp.wait_for_timeout(600)
     dp.screenshot(path=SP + '/dark.png')
     dp.close()
+
+    # Removing pictures: a selected <image> shows the X clear of the handles; the X removes it
+    pic = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22%3E%3Crect width=%2240%22 height=%2240%22 fill=%22red%22/%3E%3C/svg%3E'
+    remove_doc = ('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">\n  <rect x="0" y="0" width="400" height="300" fill="#eeeeee"/>\n'
+                  '  <image x="40" y="60" width="200" height="150" href="PIC"/>\n  <image x="300" y="40" width="20" height="20" href="PIC"/>\n</svg>\n').replace('PIC', pic)
+    get_box = '(n) => { const r = svgEditor.state.viewEls[n].getBoundingClientRect(); return { x: r.left, y: r.top, width: r.width, height: r.height }; }'
+    get_handles = '() => [...document.querySelectorAll("#overlay .handle")].map(h => { const r = h.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; })'
+    error_count = len(errs)
+    for width in (1440, 390):
+        rp = b.new_page(viewport={'width': width, 'height': 900}, has_touch=width < 860, is_mobile=width < 860)
+        rp.on('pageerror', lambda e: errs.append('PAGEERROR ' + str(e)))
+        rp.goto(URL + ('de/' if width == 390 else ''), wait_until='networkidle')
+        rp.wait_for_timeout(600)
+        rp.evaluate('t => svgEditor.setCode(t)', remove_doc)
+        rp.wait_for_timeout(500)
+        if width < 860:
+            rp.click('[data-pane=draw]')
+            rp.wait_for_timeout(300)
+        tag = f'{width} px: '
+        for n, kind in ((2, 'a large picture'), (3, 'a small picture')):
+            box = rp.evaluate(get_box, n)
+            point = (box['x'] + box['width'] / 2, box['y'] + box['height'] / 2)
+            rp.touchscreen.tap(*point) if width < 860 else rp.mouse.click(*point)
+            rp.wait_for_timeout(250)
+            xb = rp.locator('.picture-remove').bounding_box() if rp.locator('.picture-remove').is_visible() else None
+            handles = rp.evaluate(get_handles)
+            clear = xb is not None and all(h[2] <= xb['x'] or h[0] >= xb['x'] + xb['width'] or h[3] <= xb['y'] or h[1] >= xb['y'] + xb['height'] for h in handles)
+            check_that(tag + kind + ' selected shows the X clear of every handle', rp.evaluate('svgEditor.state.sel') == n and clear and xb['width'] >= 24)
+            near = xb is not None and abs(xb['x'] + xb['width'] - (box['x'] + box['width'])) < 30 and xb['y'] < box['y'] + 30
+            check_that(tag + kind + ': the X stands at its top right corner', near)
+            check_that(tag + kind + ': the X is named in the language of the page', rp.locator('.picture-remove').get_attribute('title') == ('Bild entfernen' if width == 390 else 'Remove picture'))
+            rp.screenshot(path=SP + f'/picture-remove-{width}-{n}.png')
+            if xb:
+                rp.touchscreen.tap(xb['x'] + 12, xb['y'] + 12) if width < 860 else rp.locator('.picture-remove').click()
+                rp.wait_for_timeout(300)
+            check_that(tag + 'the X removes ' + kind, rp.evaluate('svgEditor.state.code').count('<image') == 1 and rp.locator('.picture-remove').is_hidden())
+            rp.evaluate('svgEditor.undo()')
+            rp.wait_for_timeout(300)
+            check_that(tag + 'one Undo brings it back', rp.evaluate('svgEditor.state.code') == remove_doc)
+        box = rp.evaluate(get_box, 1)
+        rp.touchscreen.tap(box['x'] + 10, box['y'] + 10) if width < 860 else rp.mouse.click(box['x'] + 10, box['y'] + 10)
+        rp.wait_for_timeout(250)
+        check_that(tag + 'a selected shape other than a picture shows no X', rp.evaluate('svgEditor.state.sel') == 1 and rp.locator('.picture-remove').is_hidden())
+        rp.close()
+    check_that('No script errors while removing pictures', len(errs) == error_count, errs[error_count:])
     b.close()
 
 fails = [r for r in results if not r[1]]

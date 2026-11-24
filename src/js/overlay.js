@@ -1,14 +1,18 @@
 /**
  * The overlay over the canvas, in screen coordinates relative to the stage: the grid (minor
  * and major lines), the outline of the shape under the pointer, the selection with its
- * handles, and on touch screens the grip that drags the selected shape.
+ * handles, on touch screens the grip that drags the selected shape, and for a selected picture
+ * the X that removes it, clear of the handles.
  */
 
 import { state, elements } from './state.js?v=2';
 import { SVGNS } from './xml.js?v=6';
 import { createMatrix, TOUCH } from './util.js?v=3';
-import { getRootMatrix, getBox, getScreenBox } from './canvas.js?v=5';
+import { getRootMatrix, getBox, getScreenBox } from './canvas.js?v=6';
 import { getLength } from './export.js?v=8';
+import { removeSelection } from './structure.js?v=6';
+import { createPictureRemoveButton } from './picture-remove.js?v=1';
+import { VIEWER } from './sync.js?v=24';
 
 const MAJOR_EVERY = 5;                      // a major grid line every this many minor ones
 const MIN_MINOR_STEP = 5;                   // screen pixels below which a grid level is hidden
@@ -20,6 +24,9 @@ const LINE_HANDLE_RADIUS = 6;
 const LINE_HANDLE_RADIUS_TOUCH = 10;
 const SIDE_HANDLE_ROOM = 2.7;
 const HANDLE_CORNER_RADIUS = 2;
+/** The width and height of the X that removes a selected picture, and its space to the handles, in pixels. */
+const REMOVE_BUTTON_SIZE = 24;
+const REMOVE_BUTTON_GAP = 4;
 /** Moves the grid lines onto whole screen pixels. */
 const GRID_PIXEL_SHIFT = 'translate(-0.5 -0.5)';               // handle sizes a side needs for its middle handle
 /** The handles of a box: name -> [share of the width, share of the height]. */
@@ -38,6 +45,8 @@ const BOX_HANDLES = { nw: [0, 0], n: [0.5, 0], ne: [1, 0], e: [1, 0.5], se: [1, 
 
 /** @type {OverlayParts} */
 let overlayParts = null;
+/** The X that removes a selected picture. */
+let removeButton = null;
 
 /**
  * Builds the parts of the overlay. Runs once at the start.
@@ -56,6 +65,9 @@ export function startOverlay() {
         pMin: overlay.querySelector('#g-min'), pMaj: overlay.querySelector('#g-maj'),
         hover: overlay.querySelector('.hover'), sel: overlay.querySelector('.sel'),
     };
+    removeButton = createPictureRemoveButton(removeSelection);
+    removeButton.hidden = true;
+    elements.stage.append(removeButton);
 }
 
 /**
@@ -117,6 +129,7 @@ function drawHover() {
 function drawSelection(stage) {
     overlayParts.sel.innerHTML = '';
     elements.grip.hidden = true;
+    removeButton.hidden = true;
     if (state.sel <= 0 || state.error) return;
     const element = state.viewEls[state.sel];
     const rootBox = getBox(state.sel);
@@ -126,6 +139,31 @@ function drawSelection(stage) {
     addOverlayElement('rect', { class: 'frame', x: box.x, y: box.y, width: box.w, height: box.h });
     if (element.localName === 'line') drawLineHandles(element, stage);
     else drawBoxHandles(box);
+    if (element.localName === 'image' && !VIEWER) showRemoveButton(box, stage);
+}
+
+/**
+ * Places the X of a selected picture at its top right corner: inside the picture between the
+ * corner handle and the middle handles when it has the room, else the first place beside the
+ * corner where the whole X fits on the stage: above it, right of it, left of it, below it.
+ * @param {ShapeBox} box - the picture on the stage.
+ * @param {DOMRect} stage - the stage on the screen.
+ * @returns {void}
+ */
+function showRemoveButton(box, stage) {
+    const size = TOUCH.matches ? HANDLE_SIZE_TOUCH : HANDLE_SIZE, handle = size / 2 + REMOVE_BUTTON_GAP;
+    const room = 2 * (REMOVE_BUTTON_SIZE + size + 2 * REMOVE_BUTTON_GAP);
+    const right = box.x + box.w;
+    const places = box.w >= room && box.h >= room ? [[right - handle - REMOVE_BUTTON_SIZE, box.y + handle]] : [
+        [right - REMOVE_BUTTON_SIZE, box.y - handle - REMOVE_BUTTON_SIZE],
+        [right + handle, box.y + handle],
+        [box.x - handle - REMOVE_BUTTON_SIZE, box.y + handle],
+        [right - REMOVE_BUTTON_SIZE, box.y + box.h + handle],
+    ];
+    const place = places.find(([left, top]) => left >= 0 && top >= 0 && left + REMOVE_BUTTON_SIZE <= stage.width && top + REMOVE_BUTTON_SIZE <= stage.height);
+    if (!place) return;
+    Object.assign(removeButton.style, { left: place[0] + 'px', top: place[1] + 'px' });
+    removeButton.hidden = false;
 }
 
 /**

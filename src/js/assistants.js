@@ -18,14 +18,14 @@ import { parse } from './export.js?v=8';
 import { hasTemplateTags, TEMPLATE_SYNTAX } from './svg-template.js?v=1';
 import { formatSvg } from './xml-write.js?v=3';
 import { showToast } from './util.js?v=3';
-import { undo } from './history.js?v=5';
-import { selectElement } from './selection.js?v=5';
-import { setAttributes, applyChange, writeChangedTags } from './edits.js?v=5';
-import { removeSelection } from './structure.js?v=5';
-import { openDocument, createDocument, getBlankCode } from './documents.js?v=5';
-import { receiveDrawing, importPageDocument, AI_NAME } from './incoming.js?v=5';
+import { undo } from './history.js?v=6';
+import { selectElement } from './selection.js?v=6';
+import { setAttributes, applyChange, writeChangedTags } from './edits.js?v=6';
+import { removeSelection } from './structure.js?v=6';
+import { openDocument, createDocument, getBlankCode } from './documents.js?v=6';
+import { receiveDrawing, importPageDocument, AI_NAME } from './incoming.js?v=6';
 import { createTemplateExamples } from './template-examples.js?v=2';
-import { renderDrawing } from './view.js?v=5';
+import { renderDrawing } from './view.js?v=6';
 
 const PREFIX = 'svgeditor';
 

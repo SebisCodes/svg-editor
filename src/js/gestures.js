@@ -6,8 +6,8 @@
 
 import { state } from './state.js?v=2';
 import { getClamped } from './util.js?v=3';
-import { setZoom, updatePaper } from './canvas.js?v=5';
-import { getPointers, getStagePoint } from './pointer.js?v=5';
+import { setZoom, updatePaper } from './canvas.js?v=6';
+import { getPointers, getStagePoint } from './pointer.js?v=6';
 
 const MIN_ZOOM = 0.02;
 const MAX_ZOOM = 64;

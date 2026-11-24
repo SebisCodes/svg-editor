@@ -7,10 +7,10 @@
 
 import { state, elements } from './state.js?v=2';
 import { findElements, showToast } from './util.js?v=3';
-import { setCode, addHistoryStep } from './history.js?v=5';
-import { selectElement } from './selection.js?v=5';
-import { hasCodeError, showFixErrorFirst, writeChangedTags } from './edits.js?v=5';
-import { getBlock, getIndent, getIndexAt } from './structure.js?v=5';
+import { setCode, addHistoryStep } from './history.js?v=6';
+import { selectElement } from './selection.js?v=6';
+import { hasCodeError, showFixErrorFirst, writeChangedTags } from './edits.js?v=6';
+import { getBlock, getIndent, getIndexAt } from './structure.js?v=6';
 import { GROUPS } from './labels.js?v=3';
 
 const GROUP_ZONE_START = 0.3;               // share of a group row's height where "into" starts

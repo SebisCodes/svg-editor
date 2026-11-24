@@ -10,13 +10,13 @@
 
 import { state } from './state.js?v=2';
 import { findElement, showToast } from './util.js?v=3';
-import { setCode, addHistoryStep } from './history.js?v=5';
-import { setText } from './edits.js?v=5';
-import { setInspectorRebuild } from './inspector.js?v=5';
-import { selectElement, getSelectableIndex, getViewElementAt } from './selection.js?v=5';
+import { setCode, addHistoryStep } from './history.js?v=6';
+import { setText } from './edits.js?v=6';
+import { setInspectorRebuild } from './inspector.js?v=6';
+import { selectElement, getSelectableIndex, getViewElementAt } from './selection.js?v=6';
 import { hasTemplateTags, TEMPLATE_SYNTAX } from './svg-template.js?v=1';
 import { isExampleViewShown } from './drawing-views.js?v=2';
-import { showSidePanel } from './layout.js?v=5';
+import { showSidePanel } from './layout.js?v=6';
 
 /** What a double-click on a text with an example in the example view says. */
 const EXAMPLE_TEXT_NOTE = 'This text shows an example - edit it in the code or in the template view';

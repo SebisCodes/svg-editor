@@ -8,10 +8,10 @@
 import { state, elements } from './state.js?v=2';
 import { parseCodeTags, TEMPLATE_SYNTAX } from './svg-template.js?v=1';
 import { findElement, showToast } from './util.js?v=3';
-import { renderCode } from './code-view.js?v=5';
-import { renderDrawing } from './view.js?v=5';
-import { saveState } from './autosave.js?v=5';
-import { writeChangedTags } from './edits.js?v=5';
+import { renderCode } from './code-view.js?v=6';
+import { renderDrawing } from './view.js?v=6';
+import { saveState } from './autosave.js?v=6';
+import { writeChangedTags } from './edits.js?v=6';
 
 const HISTORY_LIMIT = 300;
 

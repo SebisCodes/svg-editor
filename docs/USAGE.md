@@ -14,7 +14,7 @@ your drawings stay there unless you send them somewhere yourself.
   indenting with Tab, automatic closing of tags and a clear error message with the line.
 - Edit shapes directly: select, drag, resize with the handles, rotate in 15° steps, flip,
   duplicate, bring forward or send backward, delete; rectangles, circles, paths, polygons,
-  text and groups.
+  text and groups. A selected picture shows an X at its top right corner that removes it.
 - Colors and outlines: fill and outline with a color picker or as a value, opacity, outline
   width, dashed lines, line ends and corners.
 - Drawing tools: rectangle, ellipse and circle, line, freehand and text.
@@ -41,8 +41,8 @@ preview never runs scripts or `on…` attributes of a drawing.
 ## Side panel
 
 The side panel holds **Properties** and **Layers**. The button at the top right of the work area
-opens it over the canvas and closes it again (Escape too); it is closed when the editor opens. On a
-phone it is the view **Edit**.
+opens it as a column right of the canvas, which gets narrower, and closes it again; it is closed
+when the editor opens. On a phone it is the view **Edit**.
 
 ## Templates with placeholders
 

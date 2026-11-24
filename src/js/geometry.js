@@ -9,7 +9,7 @@
 
 import { state } from './state.js?v=2';
 import { createMatrix } from './util.js?v=3';
-import { getBox, getElementToRootMatrix } from './canvas.js?v=5';
+import { getBox, getElementToRootMatrix } from './canvas.js?v=6';
 import { formatNumber, getNumbers, formatMatrix } from './svg-values.js?v=3';
 import { movePath, resizePath, getMappedPoints } from './svg-path.js?v=3';
 import { hasTemplateTags, TEMPLATE_SYNTAX } from './svg-template.js?v=1';

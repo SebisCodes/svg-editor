@@ -13,17 +13,17 @@
 
 import { state, elements } from './state.js?v=2';
 import { showToast, isTouchPointer, FIX_ERROR_FIRST } from './util.js?v=3';
-import { resizeToFit, updatePaper, getRootPoint } from './canvas.js?v=5';
-import { drawOverlay } from './overlay.js?v=5';
-import { selectElement, getSelectableIndex, isInsideElement, getHitIndex, getViewElementAt } from './selection.js?v=5';
-import { getSnapshot } from './geometry.js?v=5';
-import { applyChange } from './edits.js?v=5';
-import { renderInspector } from './inspector.js?v=5';
-import { showTreeHover } from './layers.js?v=5';
-import { startDraw, updateDrawPreview, stopDraw } from './tools.js?v=5';
-import { startPinch, movePinch, moveViewOnWheel } from './gestures.js?v=5';
-import { moveDraggedShape, resizeShape } from './shape-drag.js?v=5';
-import { editTextOnDoubleClick } from './text-edit.js?v=5';
+import { resizeToFit, updatePaper, getRootPoint } from './canvas.js?v=6';
+import { drawOverlay } from './overlay.js?v=6';
+import { selectElement, getSelectableIndex, isInsideElement, getHitIndex, getViewElementAt } from './selection.js?v=6';
+import { getSnapshot } from './geometry.js?v=6';
+import { applyChange } from './edits.js?v=6';
+import { renderInspector } from './inspector.js?v=6';
+import { showTreeHover } from './layers.js?v=6';
+import { startDraw, updateDrawPreview, stopDraw } from './tools.js?v=6';
+import { startPinch, movePinch, moveViewOnWheel } from './gestures.js?v=6';
+import { moveDraggedShape, resizeShape } from './shape-drag.js?v=6';
+import { editTextOnDoubleClick } from './text-edit.js?v=6';
 
 const LEFT_BUTTON = 0;
 const MIDDLE_BUTTON = 1;
