@@ -8,10 +8,10 @@
 import { state } from './state.js?v=2';
 import { parseCodeTags, TEMPLATE_SYNTAX } from './svg-template.js?v=1';
 import { showToast } from './util.js?v=3';
-import { setCode, addHistoryStep } from './history.js?v=6';
-import { selectElement } from './selection.js?v=6';
-import { hasCodeError, showFixErrorFirst, writeChangedTags, setAttributes } from './edits.js?v=6';
-import { getSnapshot, getMovedAttributes, getParentDelta } from './geometry.js?v=6';
+import { setCode, addHistoryStep } from './history.js?v=7';
+import { selectElement } from './selection.js?v=7';
+import { hasCodeError, showFixErrorFirst, writeChangedTags, setAttributes } from './edits.js?v=7';
+import { getSnapshot, getMovedAttributes, getParentDelta } from './geometry.js?v=7';
 
 const DEFAULT_INDENT = '  ';
 const COPY_OFFSET = 10;                     // root units a copy lies off its original without a grid

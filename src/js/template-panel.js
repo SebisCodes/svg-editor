@@ -8,11 +8,11 @@
 import { state, elements } from './state.js?v=2';
 import { findElement } from './util.js?v=3';
 import { TEMPLATE_SYNTAX } from './svg-template.js?v=1';
-import { editCodeRange } from './code-input.js?v=6';
-import { addHistoryStep } from './history.js?v=6';
-import { renderDrawing } from './view.js?v=6';
+import { editCodeRange } from './code-input.js?v=7';
+import { addHistoryStep } from './history.js?v=7';
+import { renderDrawing } from './view.js?v=7';
 import { startViewSwitch, showViewSwitch, showViewNote, createPlaceholderBox, getListedPlaceholders } from './template-controls.js?v=2';
-import { getViewMode, setViewMode, isExampleViewFailed, getTemplateExamples } from './drawing-views.js?v=2';
+import { getViewMode, setViewMode, isExampleViewFailed, getTemplateExamples } from './drawing-views.js?v=3';
 
 /** The box, once connected. */
 let placeholderBox = null;

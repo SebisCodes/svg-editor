@@ -8,12 +8,12 @@
 import { state, elements } from './state.js?v=2';
 import { parseStyle } from './svg-values.js?v=3';
 import { findElement, findElements, showToast, getHexColor } from './util.js?v=3';
-import { addHistoryStep } from './history.js?v=6';
-import { drawOverlay } from './overlay.js?v=6';
-import { selectElement } from './selection.js?v=6';
-import { hasCodeError, showFixErrorFirst, setAttributes, setProperty, writeChangedTags, getComputedValue } from './edits.js?v=6';
-import { removeSelection, copySelection, moveInDrawingOrder, FORWARD, BACKWARD } from './structure.js?v=6';
-import { buildInspector } from './inspector.js?v=6';
+import { addHistoryStep } from './history.js?v=7';
+import { drawOverlay } from './overlay.js?v=7';
+import { selectElement } from './selection.js?v=7';
+import { hasCodeError, showFixErrorFirst, setAttributes, setProperty, writeChangedTags, getComputedValue } from './edits.js?v=7';
+import { removeSelection, copySelection, moveInDrawingOrder, FORWARD, BACKWARD } from './structure.js?v=7';
+import { buildInspector } from './inspector.js?v=7';
 import { LABELS, PAINTABLE, escapeHtml } from './labels.js?v=3';
 
 const TEXT_PREVIEW_LENGTH = 24;

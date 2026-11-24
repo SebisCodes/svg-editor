@@ -6,7 +6,7 @@
 
 import { state, elements } from './state.js?v=2';
 import { getClamped, createMatrix, NARROW } from './util.js?v=3';
-import { drawOverlay } from './overlay.js?v=6';
+import { drawOverlay } from './overlay.js?v=7';
 
 /** The factor of one zoom step (buttons and keys). */
 export const ZOOM_STEP = 1.25;

@@ -7,7 +7,7 @@
 
 import { openDialog, openConfirmation } from './dialogs.js?v=5';
 import { createZip } from './zip.js?v=4';
-import { saveDownload } from './export.js?v=8';
+import { saveDownload } from './export.js?v=9';
 import { store, LIST_KEY } from './document-store.js?v=2';
 import { getSafeFileName, SVG_TYPE } from './util.js?v=3';
 

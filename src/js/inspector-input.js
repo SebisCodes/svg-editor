@@ -6,14 +6,14 @@
 
 import { state, elements } from './state.js?v=2';
 import { findElement, showToast, getHexColor } from './util.js?v=3';
-import { setCode } from './history.js?v=6';
-import { drawOverlay } from './overlay.js?v=6';
-import { saveState } from './autosave.js?v=6';
-import { selectElement } from './selection.js?v=6';
-import { getSnapshot, getMovedAttributes, getParentDelta } from './geometry.js?v=6';
-import { setAttributes, writeChangedTags, applyChange, setBox, setProperty, getProperty, getComputedValue, setText, addRotation, addMirror } from './edits.js?v=6';
-import { removeSelection, copySelection, moveInDrawingOrder, FORWARD, BACKWARD, TO_FRONT, TO_BACK } from './structure.js?v=6';
-import { buildInspector, setInspectorRebuild } from './inspector.js?v=6';
+import { setCode } from './history.js?v=7';
+import { drawOverlay } from './overlay.js?v=7';
+import { saveState } from './autosave.js?v=7';
+import { selectElement } from './selection.js?v=7';
+import { getSnapshot, getMovedAttributes, getParentDelta } from './geometry.js?v=7';
+import { setAttributes, writeChangedTags, applyChange, setBox, setProperty, getProperty, getComputedValue, setText, addRotation, addMirror } from './edits.js?v=7';
+import { removeSelection, copySelection, moveInDrawingOrder, FORWARD, BACKWARD, TO_FRONT, TO_BACK } from './structure.js?v=7';
+import { buildInspector, setInspectorRebuild } from './inspector.js?v=7';
 
 const PERCENT = 100;
 const ROTATION_STEP = 15;

@@ -20,8 +20,8 @@
 import { expandTemplate, findViewSegment } from './template-expansion.js?v=2';
 import { getXmlTagPlaces, escapeXmlFill } from './template-xml.js?v=1';
 import { parseTags, escapeText, escapeAttribute } from './xml.js?v=6';
-import { parse } from './export.js?v=8';
-import { setExampleReferences } from './view-safety.js?v=4';
+import { parse } from './export.js?v=9';
+import { setExampleReferences } from './view-safety.js?v=5';
 
 /** What CSS keeps of an example: letters, digits, spaces and # % . , _ + -. */
 const CSS_UNSAFE = /[^\p{L}\p{N} #%.,_+-]/gu;

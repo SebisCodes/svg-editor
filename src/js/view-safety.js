@@ -15,7 +15,7 @@
  * could spell an address is left out in both views, so no escape names an address past the rule.
  */
 
-import { VIEWER } from './sync.js?v=24';
+import { VIEWER } from './sync.js?v=25';
 import { hasTemplatePlaceholder, buildTemplatePicture } from './template-tags.js?v=2';
 import { buildEscapeSafeCss, buildCssWithAddresses, isEscapedCssValue, IMPORT_ADDRESS } from './css-references.js?v=2';
 

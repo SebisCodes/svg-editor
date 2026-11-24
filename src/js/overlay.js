@@ -8,11 +8,11 @@
 import { state, elements } from './state.js?v=2';
 import { SVGNS } from './xml.js?v=6';
 import { createMatrix, TOUCH } from './util.js?v=3';
-import { getRootMatrix, getBox, getScreenBox } from './canvas.js?v=6';
-import { getLength } from './export.js?v=8';
-import { removeSelection } from './structure.js?v=6';
+import { getRootMatrix, getBox, getScreenBox } from './canvas.js?v=7';
+import { getLength } from './export.js?v=9';
+import { removeSelection } from './structure.js?v=7';
 import { createPictureRemoveButton } from './picture-remove.js?v=1';
-import { VIEWER } from './sync.js?v=24';
+import { VIEWER } from './sync.js?v=25';
 
 const MAJOR_EVERY = 5;                      // a major grid line every this many minor ones
 const MIN_MINOR_STEP = 5;                   // screen pixels below which a grid level is hidden

@@ -10,7 +10,7 @@ import { SVGNS, escapeAttribute } from './xml.js?v=6';
 import { formatSvg, compressSvg, convertToXml } from './xml-write.js?v=3';
 import { convertToJsx } from './jsx.js?v=4';
 import { formatNumber } from './svg-values.js?v=3';
-import { setPlaceholderReferences } from './view-safety.js?v=4';
+import { setPlaceholderReferences } from './view-safety.js?v=5';
 import { hasTemplateTags } from './svg-template.js?v=1';
 
 /** Pixels per unit of the CSS units a width or height can have. */

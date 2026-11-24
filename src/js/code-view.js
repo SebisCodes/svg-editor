@@ -9,7 +9,7 @@ import { escapeText } from './xml.js?v=6';
 import { highlight } from './xml-highlight.js?v=3';
 import { buildHighlightWithTemplateTags, convertTemplateTagsToBraces } from './template-tags.js?v=2';
 import { TEMPLATE_SYNTAX } from './svg-template.js?v=1';
-import { updateHistoryUi } from './history.js?v=6';
+import { updateHistoryUi } from './history.js?v=7';
 
 const LINE_HEIGHT = 20;
 const HIGHLIGHT_LIMIT = 600000;             // characters up to which the code is highlighted
